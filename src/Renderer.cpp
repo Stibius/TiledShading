@@ -135,7 +135,10 @@ void Renderer::generateLights(int count)
 	{
 		ge::sg::PointLight light;
 
-		light.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		light.color.r = static_cast<float>(rand()) / RAND_MAX;
+		light.color.g = static_cast<float>(rand()) / RAND_MAX;
+		light.color.b = static_cast<float>(rand()) / RAND_MAX;
+		light.color.a = 1.0f;
 
 		glm::vec3 minPos = m_boundingBox->min * m_lightPosRange;
 		glm::vec3 maxPos = m_boundingBox->max * m_lightPosRange;
