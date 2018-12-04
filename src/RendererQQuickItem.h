@@ -28,6 +28,8 @@ public:
 	Q_PROPERTY(CameraType cameraType READ getCameraType WRITE setCameraType NOTIFY cameraTypeChanged)
 	Q_PROPERTY(int lightCount READ getLightCount WRITE setLightCount NOTIFY lightCountChanged)
 	Q_PROPERTY(int lightPosRange READ getLightPosRange WRITE setLightPosRange NOTIFY lightPosRangeChanged)
+	Q_PROPERTY(int pointLightRadiusMin READ getPointLightRadiusMin WRITE setPointLightRadiusMin NOTIFY pointLightRadiusMinChanged)
+	Q_PROPERTY(int pointLightRadiusMax READ getPointLightRadiusMax WRITE setPointLightRadiusMax NOTIFY pointLightRadiusMaxChanged)
 
 	enum class CameraType { ORBIT, FREELOOK };
 	Q_ENUM(CameraType)
@@ -52,6 +54,10 @@ public:
 
 	void setLightPosRange(int value);
 
+	void setPointLightRadiusMin(int value);
+
+	void setPointLightRadiusMax(int value);
+
 	void setCameraType(CameraType type);
 
 	int getFovy() const;
@@ -59,6 +65,10 @@ public:
 	int getLightCount() const;
 
 	int getLightPosRange() const;
+
+	int getPointLightRadiusMin() const;
+
+	int getPointLightRadiusMax() const;
 
 	int getMovementSpeed() const;
 
@@ -89,6 +99,10 @@ signals:
 	void lightCountChanged(int value);
 
 	void lightPosRangeChanged(int value);
+
+	void pointLightRadiusMinChanged(int value);
+
+	void pointLightRadiusMaxChanged(int value);
 
 	void movementSpeedChanged(int value);
 

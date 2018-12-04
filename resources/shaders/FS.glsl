@@ -21,15 +21,16 @@ struct Material
 	bool hasEmissiveTex;
 }; 
 
-struct Light 
+struct PointLight 
 {
     vec4 position;
     vec4 color;
+	float radius;
 };
 
 layout(std430, binding = 0) buffer LightsBuffer
 {
-    Light lights[];
+    PointLight lights[];
 };
   
 uniform Material material;
@@ -40,8 +41,15 @@ in vec2 uv;
 in vec3 FragPos;  
 in vec3 Normal; 
 
-vec3 computePhong(in Light light)
+vec3 computePhong(in PointLight light, float dist)
 {
+	//attenuation: 1 / (1 + (distance * distance))
+	float cutoff = 0.01f;                         //minimum light intensity
+	float cutoffDist = sqrt((1 / cutoff) - 1);    //distance to the cutoff
+	float radiusCoef = cutoffDist / light.radius; //coef to get the radius we want
+	//Bias by -cutoff and then scale by 1/(1-cutoff) so intensity is zero at radius distance and maximum intensity is unchanged
+	float attenuation = ((1 / (1 + (dist * dist * radiusCoef * radiusCoef))) - cutoff) / (1 - cutoff);
+
     // ambient
     vec3 ambient = light.color.rgb * material.ambient;
     if (material.hasAmbientTex) ambient *= texture(material.ambientTex, uv).rgb;
@@ -63,6 +71,10 @@ vec3 computePhong(in Light light)
 	// emissive
     vec3 emissive = light.color.rgb * material.emissive;
     if (material.hasEmissiveTex) emissive *= texture(material.emissiveTex, uv).rgb;
+
+	ambient  *= attenuation;  
+    diffuse   *= attenuation;
+    specular *= attenuation; 
        
     return ambient + diffuse + specular + emissive;
 }
@@ -84,8 +96,12 @@ void main()
     {
 	    for (int i = 0; i < lightCount; i++)
 		{
-		    Light light = lights[i];
-		    color += computePhong(light);
+		    PointLight light = lights[i];
+			float dist = distance(light.position.xyz, FragPos);
+			if (dist < light.radius)
+			{
+		        color += computePhong(light, dist);
+			}
 		}
     }
 

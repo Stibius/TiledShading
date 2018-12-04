@@ -4,7 +4,7 @@
 #include <geCore/Text.h>
 #include <geSG/Scene.h>
 #include <geSG/AABB.h>
-#include <geSG/Light.h>
+#include <Light.h>
 #include <geutil/FreeLookCamera.h>
 #include <geutil/OrbitCamera.h>
 #include <geutil/PerspectiveCamera.h>
@@ -79,6 +79,16 @@ float Renderer::getLightPosRange() const
 	return m_lightPosRange;
 }
 
+float Renderer::getPointLightRadiusMin() const
+{
+	return m_pointLightRadiusMin;
+}
+
+float Renderer::getPointLightRadiusMax() const
+{
+	return m_pointLightRadiusMax;
+}
+
 float Renderer::getMovementSpeed() const
 {
 	return m_movementSpeedCoef;
@@ -107,17 +117,37 @@ void Renderer::setLightPosRange(float value)
 	m_lightPosRange = value;
 }
 
+void Renderer::setPointLightRadiusMin(float value)
+{
+	m_pointLightRadiusMin = value;
+}
+
+void Renderer::setPointLightRadiusMax(float value)
+{
+	m_pointLightRadiusMax = value;
+}
+
 void Renderer::generateLights(int count)
 {
 	m_lights.clear();
+	glm::vec3 center = m_boundingBox->getCenter();
 	for (int i = 0; i < count; i++)
 	{
-		ge::sg::Light light;
+		ge::sg::PointLight light;
+
 		light.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		light.position.x = (m_boundingBox->min.x + (rand() / (RAND_MAX / (m_boundingBox->max.x - m_boundingBox->min.x)))) * m_lightPosRange;
-		light.position.y = (m_boundingBox->min.y + (rand() / (RAND_MAX / (m_boundingBox->max.y - m_boundingBox->min.y)))) * m_lightPosRange;
-		light.position.z = (m_boundingBox->min.z + (rand() / (RAND_MAX / (m_boundingBox->max.z - m_boundingBox->min.z)))) * m_lightPosRange;
+
+		glm::vec3 minPos = m_boundingBox->min * m_lightPosRange;
+		glm::vec3 maxPos = m_boundingBox->max * m_lightPosRange;
+		light.position.x = minPos.x + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.x - minPos.x));
+		light.position.y = minPos.y + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.y - minPos.y));
+		light.position.z = minPos.z + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.z - minPos.z));
 		light.position.w = 1.0f;
+
+		float minRadius = m_pointLightRadiusMin * m_boundingBox->getLongestSide();
+		float maxRadius = m_pointLightRadiusMax * m_boundingBox->getLongestSide();
+		light.radius = minRadius + ((static_cast<float>(rand()) / RAND_MAX) * (maxRadius - minRadius));
+
 		m_lights.push_back(light);
 	}
 
@@ -302,7 +332,7 @@ void Renderer::onRender()
 
 		if (m_lights.size() != 0)
 		{
-			m_lightsBuffer = std::make_unique<ge::gl::Buffer>(m_lights.size() * sizeof(ge::sg::Light), m_lights.data(), GL_DYNAMIC_DRAW);
+			m_lightsBuffer = std::make_unique<ge::gl::Buffer>(m_lights.size() * sizeof(ge::sg::PointLight), m_lights.data(), GL_DYNAMIC_DRAW);
 			m_lightsBuffer->bindBase(GL_SHADER_STORAGE_BUFFER, 0);
 		}
 

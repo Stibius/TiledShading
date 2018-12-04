@@ -49,7 +49,7 @@ void RendererQQuickItem::setMovementSpeed(int value)
 {
 	if (value != getMovementSpeed())
 	{
-		m_renderer->setMovementSpeed(value / 100.0f);
+		m_renderer->setMovementSpeed(value / 1000.0f);
 
 		emit movementSpeedChanged(value);
 	}
@@ -75,9 +75,35 @@ void RendererQQuickItem::setLightPosRange(int value)
 {
 	if (value != getLightPosRange())
 	{
-		m_renderer->setLightPosRange(value / 100.0f);
+		m_renderer->setLightPosRange(value / 1000.0f);
 
 		emit lightPosRangeChanged(value);
+	}
+}
+
+void RendererQQuickItem::setPointLightRadiusMin(int value)
+{
+	if (value != getPointLightRadiusMin())
+	{
+		if (value <= getPointLightRadiusMax())
+		{
+			m_renderer->setPointLightRadiusMin(value / 1000.0f);
+		}
+
+		emit pointLightRadiusMinChanged(value);
+	}
+}
+
+void RendererQQuickItem::setPointLightRadiusMax(int value)
+{
+	if (value != getPointLightRadiusMax())
+	{
+		if (value >= getPointLightRadiusMin())
+		{
+			m_renderer->setPointLightRadiusMax(value / 1000.0f);
+		}
+
+		emit pointLightRadiusMaxChanged(value);
 	}
 }
 
@@ -103,12 +129,22 @@ int RendererQQuickItem::getLightCount() const
 
 int RendererQQuickItem::getLightPosRange() const
 {
-	return static_cast<int>(m_renderer->getLightPosRange() * 100);
+	return static_cast<int>(m_renderer->getLightPosRange() * 1000);
+}
+
+int RendererQQuickItem::getPointLightRadiusMin() const
+{
+	return static_cast<int>(m_renderer->getPointLightRadiusMin() * 1000);
+}
+
+int RendererQQuickItem::getPointLightRadiusMax() const
+{
+	return static_cast<int>(m_renderer->getPointLightRadiusMax() * 1000);
 }
 
 int RendererQQuickItem::getMovementSpeed() const
 {
-	return static_cast<int>(m_renderer->getMovementSpeed() * 100);
+	return static_cast<int>(m_renderer->getMovementSpeed() * 1000);
 }
 
 RendererQQuickItem::CameraType RendererQQuickItem::getCameraType() const

@@ -21,7 +21,7 @@ namespace ge
 	{
 		class Scene;
 		class SceneAABB;
-		class Light;
+		struct PointLight;
 	}
 
 	namespace glsg 
@@ -74,6 +74,10 @@ public:
 
 	void setLightPosRange(float value);
 
+	void setPointLightRadiusMin(float value);
+
+	void setPointLightRadiusMax(float value);
+
 	void generateLights(int count);
 
 	void setCameraType(CameraType type);
@@ -83,6 +87,10 @@ public:
 	int getLightCount() const;
 
 	float getLightPosRange() const;
+
+	float getPointLightRadiusMin() const;
+
+	float getPointLightRadiusMax() const;
 
 	float getMovementSpeed() const;
 
@@ -118,7 +126,7 @@ private:
 	std::shared_ptr<ge::sg::Scene> m_scene = nullptr;
 	std::unique_ptr<ge::util::CameraTransform> m_transformCamera = nullptr;
 	std::unique_ptr<ge::util::PerspectiveCamera> m_perspectiveCamera = nullptr;
-	std::vector<ge::sg::Light> m_lights;
+	std::vector<ge::sg::PointLight> m_lights;
 	std::unique_ptr<ge::gl::Buffer> m_lightsBuffer = nullptr;
 	std::unique_ptr<SimpleVT> m_VT = nullptr;
 	std::unique_ptr<ge::sg::SceneAABB> m_boundingBox = nullptr;
@@ -128,7 +136,9 @@ private:
 	float m_movementSpeedCoef = 0.1f;
 	float m_near = 0.1f;
 	float m_far = 1000.0f;
-	float m_lightPosRange = 10.0f;
+	float m_lightPosRange = 2.0f;
+	float m_pointLightRadiusMin = 0.1f;
+	float m_pointLightRadiusMax = 0.5f;
 	bool m_needToProcessScene = false;
 	bool m_needToSetLightUniforms = true;
 	bool m_mouseRightPressed = false;

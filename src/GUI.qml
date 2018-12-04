@@ -164,12 +164,14 @@ ApplicationWindow
 		{
 		    sbLightCount.value = rendererItem.lightCount;
 			sbLightPosRange.value = rendererItem.lightPosRange;
+			sbPointLightRadiusMin.value = rendererItem.pointLightRadiusMin;
+			sbPointLightRadiusMax.value = rendererItem.pointLightRadiusMax;
 		}
 
 		GridLayout 
 		{
-            columns: 3
-			rows: 5
+            columns: 4
+			rows: 7
             rowSpacing: 10
             columnSpacing: 10
             anchors.top: parent.top;
@@ -186,6 +188,7 @@ ApplicationWindow
             }
 			RowLayout
 			{
+			    Layout.columnSpan: 3
                 spacing: 10
 
 				ButtonGroup 
@@ -270,7 +273,7 @@ ApplicationWindow
                 value: rendererItem.movementSpeed
                 from: 0
 				to: 1000
-				stepSize: 10
+				stepSize: 100
 				editable: true
 
 				property int decimals: 3
@@ -313,23 +316,6 @@ ApplicationWindow
 				to: 10000
 				editable: true
             }
-			Button 
-			{
-			    Layout.column: 2
-                Layout.row: 3
-
-                text: "Generate lights"
-
-				onClicked: 
-				{
-				    if (sbLightPosRange.value != rendererItem.lightPosRange)
-					{
-					    rendererItem.lightPosRange = sbLightPosRange.value;
-					}
-
-				    rendererItem.lightCount = sbLightCount.value;
-				}
-            }
 
 			Label 
 			{
@@ -347,21 +333,112 @@ ApplicationWindow
 
                 value: rendererItem.lightPosRange
                 from: 0
-				to: 10000
+				to: 100000
 				stepSize: 100
 				editable: true
 
-				property int decimals: 2
+				property int decimals: 3
 
 				textFromValue: function(value, locale) 
 				{
-                    return Number(value / 100).toLocaleString(locale, 'f', sbLightPosRange.decimals)
+                    return Number(value / 1000).toLocaleString(locale, 'f', sbLightPosRange.decimals)
                 }
 
                 valueFromText: function(text, locale) 
 				{
-                    return Number.fromLocaleString(locale, text) * 100
+                    return Number.fromLocaleString(locale, text) * 1000
                 }
+            }
+
+			Label 
+			{
+				Layout.column: 0
+                Layout.row: 5
+
+                text: "Point light radius:"
+            }
+			SpinBox 
+			{
+                id: sbPointLightRadiusMin
+
+				Layout.column: 1
+                Layout.row: 5
+
+                value: rendererItem.pointLightRadiusMin
+                from: 0
+				to: 1000
+				stepSize: 100
+				editable: true
+
+				property int decimals: 3
+
+				textFromValue: function(value, locale) 
+				{
+                    return Number(value / 1000).toLocaleString(locale, 'f', sbPointLightRadiusMin.decimals)
+                }
+
+                valueFromText: function(text, locale) 
+				{
+                    return Number.fromLocaleString(locale, text) * 1000
+                }
+            }
+			Label 
+			{
+				Layout.column: 2
+                Layout.row: 5
+
+                text: "-"
+            }
+			SpinBox 
+			{
+                id: sbPointLightRadiusMax
+
+				Layout.column: 3
+                Layout.row: 5
+
+                value: rendererItem.pointLightRadiusMax
+                from: 0
+				to: 1000
+				stepSize: 100
+				editable: true
+
+				property int decimals: 3
+
+				textFromValue: function(value, locale) 
+				{
+                    return Number(value / 1000).toLocaleString(locale, 'f', sbPointLightRadiusMax.decimals)
+                }
+
+                valueFromText: function(text, locale) 
+				{
+                    return Number.fromLocaleString(locale, text) * 1000
+                }
+            }
+
+			Button 
+			{
+			    Layout.column: 1
+                Layout.row: 6
+
+                text: "Generate lights"
+
+				onClicked: 
+				{
+				    if (sbLightPosRange.value != rendererItem.lightPosRange)
+					{
+					    rendererItem.lightPosRange = sbLightPosRange.value;
+					}
+					if (sbPointLightRadiusMin.value != rendererItem.pointLightRadiusMin)
+					{
+					    rendererItem.pointLightRadiusMin = sbPointLightRadiusMin.value;
+					}
+					if (sbPointLightRadiusMax.value != rendererItem.pointLightRadiusMax)
+					{
+					    rendererItem.pointLightRadiusMax = sbPointLightRadiusMax.value;
+					}
+
+				    rendererItem.lightCount = sbLightCount.value;
+				}
             }
         }
     }
