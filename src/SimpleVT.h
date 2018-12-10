@@ -28,41 +28,44 @@ namespace ge
 	}
 }
 
-/**
- * This VT is used to draw a textured object. 
- * The usage of the VT is to supply the GLScene, then call the processScene. Once this is done
- * you can call drawSetup and draw each frame. You need to have OpenGL context <b>active</b>.
- */
-class SimpleVT : public VisualizationTechnique
+namespace ts
 {
-public:
+	/**
+	 * This VT is used to draw a textured object.
+	 * The usage of the VT is to supply the GLScene, then call the processScene. Once this is done
+	 * you can call drawSetup and draw each frame. You need to have OpenGL context <b>active</b>.
+	 */
+	class SimpleVT : public VisualizationTechnique
+	{
+	public:
 
-	SimpleVT() = default;
+		SimpleVT() = default;
 
-	virtual ~SimpleVT() = default;
+		virtual ~SimpleVT() = default;
 
-	virtual void setScene(std::shared_ptr<ge::glsg::GLScene> scene);
+		virtual void setScene(std::shared_ptr<ge::glsg::GLScene> scene);
 
-	virtual void processScene();
+		virtual void processScene();
 
-	void drawSetup() override;
+		void drawSetup() override;
 
-	void draw() override;
+		void draw() override;
 
-	static int semantic2Attribute(ge::sg::AttributeDescriptor::Semantic semantic);
+		static int semantic2Attribute(ge::sg::AttributeDescriptor::Semantic semantic);
 
-	std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
+		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
 
-	std::shared_ptr<ge::gl::Program> m_shaderProgram = nullptr;
+		std::shared_ptr<ge::gl::Program> m_shaderProgram = nullptr;
 
-protected:
+	protected:
 
-	std::shared_ptr<ge::glsg::GLScene> m_glScene = nullptr;
+		std::shared_ptr<ge::glsg::GLScene> m_glScene = nullptr;
 
-	std::unordered_map<ge::sg::Mesh*, std::shared_ptr<ge::gl::VertexArray>> VAOContainer;
+		std::unordered_map<ge::sg::Mesh*, std::shared_ptr<ge::gl::VertexArray>> VAOContainer;
 
-	std::unordered_map<ge::sg::Mesh*, std::unordered_map<ge::sg::MaterialSimpleComponent::Semantic, std::unique_ptr<unsigned char[]>>> colorContainer;
+		std::unordered_map<ge::sg::Mesh*, std::unordered_map<ge::sg::MaterialSimpleComponent::Semantic, std::unique_ptr<unsigned char[]>>> colorContainer;
 
-	std::unordered_map<ge::sg::Mesh*, std::unordered_map<ge::sg::MaterialImageComponent::Semantic, std::shared_ptr<ge::gl::Texture>>> textureContainer;
+		std::unordered_map<ge::sg::Mesh*, std::unordered_map<ge::sg::MaterialImageComponent::Semantic, std::shared_ptr<ge::gl::Texture>>> textureContainer;
 
-};
+	};
+}

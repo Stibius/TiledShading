@@ -366,7 +366,7 @@ ApplicationWindow
 
                 value: rendererItem.pointLightRadiusMin
                 from: 0
-				to: 1000
+				to: 100000
 				stepSize: 100
 				editable: true
 
@@ -398,7 +398,7 @@ ApplicationWindow
 
                 value: rendererItem.pointLightRadiusMax
                 from: 0
-				to: 1000
+				to: 100000
 				stepSize: 100
 				editable: true
 
@@ -427,6 +427,10 @@ ApplicationWindow
 				    if (sbLightPosRange.value != rendererItem.lightPosRange)
 					{
 					    rendererItem.lightPosRange = sbLightPosRange.value;
+					}
+					if (sbPointLightRadiusMin.value > sbPointLightRadiusMax.value)
+					{
+					    sbPointLightRadiusMax.value = sbPointLightRadiusMin.value;
 					}
 					if (sbPointLightRadiusMin.value != rendererItem.pointLightRadiusMin)
 					{

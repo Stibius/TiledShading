@@ -56,7 +56,7 @@ set(HEADER_FILES
    src/RendererQQuickItem.h
    src/SimpleVT.h
    src/VisualizationTechnique.h
-   src/SceneAABB.h
+   src/AABB.h
    src/SceneLoader.h
    ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.h
    ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.h
@@ -70,7 +70,7 @@ if(WIN32)
        src/Renderer.cpp
        src/RendererQQuickItem.cpp
        src/SimpleVT.cpp
-       src/SceneAABB.cpp
+       src/AABB.cpp
        src/SceneLoader.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.cpp
@@ -83,7 +83,7 @@ else()
        src/Renderer.cpp
        src/RendererQQuickItem.cpp
        src/SimpleVT.cpp
-       src/SceneAABB.cpp
+       src/AABB.cpp
        src/SceneLoader.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.cpp

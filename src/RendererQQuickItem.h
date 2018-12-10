@@ -3,9 +3,7 @@
 #include <QtQuick/QQuickItem>
 #include <memory>
 
-class Renderer;
 class QThread;
-class SceneLoader;
 
 namespace ge
 {
@@ -15,124 +13,130 @@ namespace ge
 	}
 }
 
-class RendererQQuickItem : public QQuickItem
+namespace ts
 {
-	Q_OBJECT
+	class Renderer;
+	class SceneLoader;
 
-public:
+	class RendererQQuickItem : public QQuickItem
+	{
+		Q_OBJECT
 
-	Q_PROPERTY(bool sceneLoading MEMBER m_sceneLoading NOTIFY sceneLoadingChanged)
-	Q_PROPERTY(float renderTime MEMBER m_renderTime NOTIFY renderTimeChanged)
-	Q_PROPERTY(int fovy READ getFovy WRITE setFovy NOTIFY fovyChanged)
-	Q_PROPERTY(int movementSpeed READ getMovementSpeed WRITE setMovementSpeed NOTIFY movementSpeedChanged)
-	Q_PROPERTY(CameraType cameraType READ getCameraType WRITE setCameraType NOTIFY cameraTypeChanged)
-	Q_PROPERTY(int lightCount READ getLightCount WRITE setLightCount NOTIFY lightCountChanged)
-	Q_PROPERTY(int lightPosRange READ getLightPosRange WRITE setLightPosRange NOTIFY lightPosRangeChanged)
-	Q_PROPERTY(int pointLightRadiusMin READ getPointLightRadiusMin WRITE setPointLightRadiusMin NOTIFY pointLightRadiusMinChanged)
-	Q_PROPERTY(int pointLightRadiusMax READ getPointLightRadiusMax WRITE setPointLightRadiusMax NOTIFY pointLightRadiusMaxChanged)
+	public:
 
-	enum class CameraType { ORBIT, FREELOOK };
-	Q_ENUM(CameraType)
+		Q_PROPERTY(bool sceneLoading MEMBER m_sceneLoading NOTIFY sceneLoadingChanged)
+		Q_PROPERTY(float renderTime MEMBER m_renderTime NOTIFY renderTimeChanged)
+		Q_PROPERTY(int fovy READ getFovy WRITE setFovy NOTIFY fovyChanged)
+		Q_PROPERTY(int movementSpeed READ getMovementSpeed WRITE setMovementSpeed NOTIFY movementSpeedChanged)
+		Q_PROPERTY(CameraType cameraType READ getCameraType WRITE setCameraType NOTIFY cameraTypeChanged)
+		Q_PROPERTY(int lightCount READ getLightCount WRITE setLightCount NOTIFY lightCountChanged)
+		Q_PROPERTY(int lightPosRange READ getLightPosRange WRITE setLightPosRange NOTIFY lightPosRangeChanged)
+		Q_PROPERTY(int pointLightRadiusMin READ getPointLightRadiusMin WRITE setPointLightRadiusMin NOTIFY pointLightRadiusMinChanged)
+		Q_PROPERTY(int pointLightRadiusMax READ getPointLightRadiusMax WRITE setPointLightRadiusMax NOTIFY pointLightRadiusMaxChanged)
 
-	RendererQQuickItem();
+		enum class CameraType { ORBIT, FREELOOK };
+		Q_ENUM(CameraType)
 
-	RendererQQuickItem(const RendererQQuickItem&) = delete;
+		RendererQQuickItem();
 
-	RendererQQuickItem(RendererQQuickItem&&) = default;
+		RendererQQuickItem(const RendererQQuickItem&) = delete;
 
-	RendererQQuickItem& operator=(const RendererQQuickItem&) = delete;
+		RendererQQuickItem(RendererQQuickItem&&) = default;
 
-	RendererQQuickItem& operator=(RendererQQuickItem&&) = default;
+		RendererQQuickItem& operator=(const RendererQQuickItem&) = delete;
 
-	virtual ~RendererQQuickItem();
+		RendererQQuickItem& operator=(RendererQQuickItem&&) = default;
 
-	void setFovy(int value);
+		virtual ~RendererQQuickItem();
 
-	void setMovementSpeed(int value);
+		void setFovy(int value);
 
-	void setLightCount(int value);
+		void setMovementSpeed(int value);
 
-	void setLightPosRange(int value);
+		void setLightCount(int value);
 
-	void setPointLightRadiusMin(int value);
+		void setLightPosRange(int value);
 
-	void setPointLightRadiusMax(int value);
+		void setPointLightRadiusMin(int value);
 
-	void setCameraType(CameraType type);
+		void setPointLightRadiusMax(int value);
 
-	int getFovy() const;
+		void setCameraType(CameraType type);
 
-	int getLightCount() const;
+		int getFovy() const;
 
-	int getLightPosRange() const;
+		int getLightCount() const;
 
-	int getPointLightRadiusMin() const;
+		int getLightPosRange() const;
 
-	int getPointLightRadiusMax() const;
+		int getPointLightRadiusMin() const;
 
-	int getMovementSpeed() const;
+		int getPointLightRadiusMax() const;
 
-	CameraType getCameraType() const;
+		int getMovementSpeed() const;
 
-signals:
+		CameraType getCameraType() const;
 
-	void loadScene(const QUrl& sceneFile);
+	signals:
 
-	void mouseLeftPressed(const QPointF& position);
+		void loadScene(const QUrl& sceneFile);
 
-	void mouseRightPressed(const QPointF& position);
+		void mouseLeftPressed(const QPointF& position);
 
-	void mouseLeftReleased(const QPointF& position);
+		void mouseRightPressed(const QPointF& position);
 
-	void mouseRightReleased(const QPointF& position);
+		void mouseLeftReleased(const QPointF& position);
 
-	void mousePositionChanged(const QPointF& position);
+		void mouseRightReleased(const QPointF& position);
 
-	void keyPressed(Qt::Key key);
+		void mousePositionChanged(const QPointF& position);
 
-	void renderTimeChanged(float time);
+		void keyPressed(Qt::Key key);
 
-	void sceneLoadingChanged(bool value);
+		void renderTimeChanged(float time);
 
-	void fovyChanged(int value);
+		void sceneLoadingChanged(bool value);
 
-	void lightCountChanged(int value);
+		void fovyChanged(int value);
 
-	void lightPosRangeChanged(int value);
+		void lightCountChanged(int value);
 
-	void pointLightRadiusMinChanged(int value);
+		void lightPosRangeChanged(int value);
 
-	void pointLightRadiusMaxChanged(int value);
+		void pointLightRadiusMinChanged(int value);
 
-	void movementSpeedChanged(int value);
+		void pointLightRadiusMaxChanged(int value);
 
-	void cameraTypeChanged(CameraType type);
+		void movementSpeedChanged(int value);
 
-public slots:
+		void cameraTypeChanged(CameraType type);
 
-	void onSynchronize();
+	public slots:
 
-	void onSceneGraphInvalidated();
+		void onSynchronize();
 
-	void onRenderingFinished(float time);
+		void onSceneGraphInvalidated();
 
-	void onSceneLoaded(std::shared_ptr<ge::sg::Scene> scene);
+		void onRenderingFinished(float time);
 
-	void onSceneLoadingFailed();
+		void onSceneLoaded(std::shared_ptr<ge::sg::Scene> scene);
 
-private slots:
+		void onSceneLoadingFailed();
 
-	void onWindowChanged(QQuickWindow* win);
+	private slots:
 
-	void onLoadScene(const QUrl& sceneFile);
+		void onWindowChanged(QQuickWindow* win);
 
-private:
+		void onLoadScene(const QUrl& sceneFile);
 
-	std::unique_ptr<Renderer> m_renderer;
-	std::unique_ptr<QThread> m_sceneLoaderThread;
-	std::unique_ptr<SceneLoader> m_sceneLoader;
-	float m_renderTime;
-	bool m_sceneLoading = false;
-};
+	private:
+
+		std::unique_ptr<Renderer> m_renderer;
+		std::unique_ptr<QThread> m_sceneLoaderThread;
+		std::unique_ptr<SceneLoader> m_sceneLoader;
+		float m_renderTime;
+		bool m_sceneLoading = false;
+	};
+}
 
 

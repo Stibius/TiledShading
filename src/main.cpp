@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	QSurfaceFormat::setDefaultFormat(format);
 
-	qmlRegisterType<RendererQQuickItem>("TiledShading", 1, 0, "RendererItem");
+	qmlRegisterType<ts::RendererQQuickItem>("TiledShading", 1, 0, "RendererItem");
 
 	QQmlApplicationEngine qmlEngine("qrc:/GUI.qml");
 

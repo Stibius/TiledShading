@@ -1,12 +1,12 @@
-#include <SceneAABB.h>
+#include <AABB.h>
 #include <geSG/Scene.h>
 
-ge::sg::SceneAABB::SceneAABB(const Scene& scene)
+ts::AABB::AABB(const ge::sg::Scene& scene)
 {
 	compute(scene);
 }
 
-bool ge::sg::SceneAABB::compute(const Scene& scene)
+bool ts::AABB::compute(const ge::sg::Scene& scene)
 {
 	min = glm::vec3(0.0f, 0.0f, 0.0f);
 	max = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -16,7 +16,7 @@ bool ge::sg::SceneAABB::compute(const Scene& scene)
 		return false;
 	}
 
-	SceneAABB bbox;
+	AABB bbox;
 	bbox.min = glm::vec3(std::numeric_limits<float>::max());
 	bbox.max = glm::vec3(std::numeric_limits<float>::min());
 
@@ -48,7 +48,7 @@ bool ge::sg::SceneAABB::compute(const Scene& scene)
 	return true;
 }
 
-float ge::sg::SceneAABB::getLongestSide() const
+float ts::AABB::getLongestSide() const
 {
 	float xSize = max.x - min.x;
 	float ySize = max.y - min.y;
@@ -68,7 +68,7 @@ float ge::sg::SceneAABB::getLongestSide() const
 	}
 }
 
-glm::vec3 ge::sg::SceneAABB::getCenter() const
+glm::vec3 ts::AABB::getCenter() const
 {
 	return glm::vec3(
 		0.5f * (max.x + min.x),

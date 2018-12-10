@@ -5,7 +5,7 @@
 #include <Renderer.h>
 #include <geSG/Scene.h>
 
-RendererQQuickItem::RendererQQuickItem()
+ts::RendererQQuickItem::RendererQQuickItem()
 {
 	m_renderer = std::make_unique<Renderer>();
 	m_sceneLoaderThread = std::make_unique<QThread>();
@@ -29,13 +29,13 @@ RendererQQuickItem::RendererQQuickItem()
 	m_sceneLoaderThread->start();
 }
 
-RendererQQuickItem::~RendererQQuickItem()
+ts::RendererQQuickItem::~RendererQQuickItem()
 {
 	m_sceneLoaderThread->quit();
 	m_sceneLoaderThread->wait();
 }
 
-void RendererQQuickItem::setFovy(int value)
+void ts::RendererQQuickItem::setFovy(int value)
 {
 	if (value != getFovy())
 	{
@@ -45,7 +45,7 @@ void RendererQQuickItem::setFovy(int value)
 	}
 }
 
-void RendererQQuickItem::setMovementSpeed(int value)
+void ts::RendererQQuickItem::setMovementSpeed(int value)
 {
 	if (value != getMovementSpeed())
 	{
@@ -55,7 +55,7 @@ void RendererQQuickItem::setMovementSpeed(int value)
 	}
 }
 
-void RendererQQuickItem::setLightCount(int value)
+void ts::RendererQQuickItem::setLightCount(int value)
 {
 	bool changed = false;
 	if (value != getLightCount())
@@ -71,7 +71,7 @@ void RendererQQuickItem::setLightCount(int value)
 	}
 }
 
-void RendererQQuickItem::setLightPosRange(int value)
+void ts::RendererQQuickItem::setLightPosRange(int value)
 {
 	if (value != getLightPosRange())
 	{
@@ -81,33 +81,27 @@ void RendererQQuickItem::setLightPosRange(int value)
 	}
 }
 
-void RendererQQuickItem::setPointLightRadiusMin(int value)
+void ts::RendererQQuickItem::setPointLightRadiusMin(int value)
 {
 	if (value != getPointLightRadiusMin())
 	{
-		if (value <= getPointLightRadiusMax())
-		{
-			m_renderer->setPointLightRadiusMin(value / 1000.0f);
-		}
+		m_renderer->setPointLightRadiusMin(value / 1000.0f);
 
 		emit pointLightRadiusMinChanged(value);
 	}
 }
 
-void RendererQQuickItem::setPointLightRadiusMax(int value)
+void ts::RendererQQuickItem::setPointLightRadiusMax(int value)
 {
 	if (value != getPointLightRadiusMax())
 	{
-		if (value >= getPointLightRadiusMin())
-		{
-			m_renderer->setPointLightRadiusMax(value / 1000.0f);
-		}
+		m_renderer->setPointLightRadiusMax(value / 1000.0f);
 
 		emit pointLightRadiusMaxChanged(value);
 	}
 }
 
-void RendererQQuickItem::setCameraType(CameraType type)
+void ts::RendererQQuickItem::setCameraType(CameraType type)
 {
 	if (type != getCameraType())
 	{
@@ -117,42 +111,42 @@ void RendererQQuickItem::setCameraType(CameraType type)
 	}
 }
 
-int RendererQQuickItem::getFovy() const
+int ts::RendererQQuickItem::getFovy() const
 {
 	return static_cast<int>(m_renderer->getFovy());
 }
 
-int RendererQQuickItem::getLightCount() const
+int ts::RendererQQuickItem::getLightCount() const
 {
 	return m_renderer->getLightCount();
 }
 
-int RendererQQuickItem::getLightPosRange() const
+int ts::RendererQQuickItem::getLightPosRange() const
 {
 	return static_cast<int>(m_renderer->getLightPosRange() * 1000);
 }
 
-int RendererQQuickItem::getPointLightRadiusMin() const
+int ts::RendererQQuickItem::getPointLightRadiusMin() const
 {
 	return static_cast<int>(m_renderer->getPointLightRadiusMin() * 1000);
 }
 
-int RendererQQuickItem::getPointLightRadiusMax() const
+int ts::RendererQQuickItem::getPointLightRadiusMax() const
 {
 	return static_cast<int>(m_renderer->getPointLightRadiusMax() * 1000);
 }
 
-int RendererQQuickItem::getMovementSpeed() const
+int ts::RendererQQuickItem::getMovementSpeed() const
 {
 	return static_cast<int>(m_renderer->getMovementSpeed() * 1000);
 }
 
-RendererQQuickItem::CameraType RendererQQuickItem::getCameraType() const
+ts::RendererQQuickItem::CameraType ts::RendererQQuickItem::getCameraType() const
 {
 	return static_cast<CameraType>(m_renderer->getCameraType());
 }
 
-void RendererQQuickItem::onWindowChanged(QQuickWindow* win)
+void ts::RendererQQuickItem::onWindowChanged(QQuickWindow* win)
 {
 	if (win != nullptr)
 	{
@@ -167,12 +161,12 @@ void RendererQQuickItem::onWindowChanged(QQuickWindow* win)
 	}
 }
 
-void RendererQQuickItem::onSceneGraphInvalidated()
+void ts::RendererQQuickItem::onSceneGraphInvalidated()
 {
 	//qDebug() << "Context will be released";
 }
 
-void RendererQQuickItem::onRenderingFinished(float time)
+void ts::RendererQQuickItem::onRenderingFinished(float time)
 {
 	if (m_renderTime != time)
 	{
@@ -181,7 +175,7 @@ void RendererQQuickItem::onRenderingFinished(float time)
 	}
 }
 
-void RendererQQuickItem::onSceneLoaded(std::shared_ptr<ge::sg::Scene> scene)
+void ts::RendererQQuickItem::onSceneLoaded(std::shared_ptr<ge::sg::Scene> scene)
 {
 	m_renderer->setScene(scene);
 
@@ -189,7 +183,7 @@ void RendererQQuickItem::onSceneLoaded(std::shared_ptr<ge::sg::Scene> scene)
 	emit sceneLoadingChanged(false);
 }
 
-void RendererQQuickItem::onSceneLoadingFailed()
+void ts::RendererQQuickItem::onSceneLoadingFailed()
 {
 	qDebug() << "scene load failed";
 
@@ -197,13 +191,13 @@ void RendererQQuickItem::onSceneLoadingFailed()
 	emit sceneLoadingChanged(false);
 }
 
-void RendererQQuickItem::onLoadScene(const QUrl& sceneFile)
+void ts::RendererQQuickItem::onLoadScene(const QUrl& sceneFile)
 {
 	m_sceneLoading = true;
 	emit sceneLoadingChanged(true);
 }
 
-void RendererQQuickItem::onSynchronize()
+void ts::RendererQQuickItem::onSynchronize()
 {
 	m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
 	m_renderer->setWindow(window());

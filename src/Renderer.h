@@ -20,7 +20,6 @@ namespace ge
 	namespace sg
 	{
 		class Scene;
-		class SceneAABB;
 		struct PointLight;
 	}
 
@@ -36,116 +35,120 @@ namespace ge
 	}
 }
 
-class SimpleVT;
-
-class Renderer : public QObject
+namespace ts
 {
-	Q_OBJECT
+	class AABB;
+	class SimpleVT;
 
-public:
+	class Renderer : public QObject
+	{
+		Q_OBJECT
 
-	enum class CameraType { ORBIT, FREELOOK };
+	public:
 
-	Renderer();
+		enum class CameraType { ORBIT, FREELOOK };
 
-	Renderer(const Renderer&) = delete;
+		Renderer();
 
-	Renderer(Renderer&&) = default;
+		Renderer(const Renderer&) = delete;
 
-	Renderer& operator=(const Renderer&) = delete;
+		Renderer(Renderer&&) = default;
 
-	Renderer& operator=(Renderer&&) = default;
+		Renderer& operator=(const Renderer&) = delete;
 
-	virtual ~Renderer() = default;
+		Renderer& operator=(Renderer&&) = default;
 
-	void setViewportSize(const QSize& size);
+		virtual ~Renderer() = default;
 
-	void setWindow(QQuickWindow* window);
+		void setViewportSize(const QSize& size);
 
-	void setScene(std::shared_ptr<ge::sg::Scene> scene);
+		void setWindow(QQuickWindow* window);
 
-	void setupGLState();
+		void setScene(std::shared_ptr<ge::sg::Scene> scene);
 
-	void loadShaders(const std::string& vsPath, const std::string& fsPath);
+		void setupGLState();
 
-	void setFovy(float value);
+		void loadShaders(const std::string& vsPath, const std::string& fsPath);
 
-	void setMovementSpeed(float value);
+		void setFovy(float value);
 
-	void setLightPosRange(float value);
+		void setMovementSpeed(float value);
 
-	void setPointLightRadiusMin(float value);
+		void setLightPosRange(float value);
 
-	void setPointLightRadiusMax(float value);
+		void setPointLightRadiusMin(float value);
 
-	void generateLights(int count);
+		void setPointLightRadiusMax(float value);
 
-	void setCameraType(CameraType type);
+		void generateLights(int count);
 
-	float getFovy() const;
+		void setCameraType(CameraType type);
 
-	int getLightCount() const;
+		float getFovy() const;
 
-	float getLightPosRange() const;
+		int getLightCount() const;
 
-	float getPointLightRadiusMin() const;
+		float getLightPosRange() const;
 
-	float getPointLightRadiusMax() const;
+		float getPointLightRadiusMin() const;
 
-	float getMovementSpeed() const;
+		float getPointLightRadiusMax() const;
 
-	CameraType getCameraType() const;
+		float getMovementSpeed() const;
 
-signals:
+		CameraType getCameraType() const;
 
-	void redraw();
+	signals:
 
-	void renderingFinished(float time);
+		void redraw();
 
-public slots:
+		void renderingFinished(float time);
 
-	void onRender();
+	public slots:
 
-	void onMouseLeftPressed(const QPointF& position);
+		void onRender();
 
-	void onMouseRightPressed(const QPointF& position);
+		void onMouseLeftPressed(const QPointF& position);
 
-	void onMouseLeftReleased(const QPointF& position);
+		void onMouseRightPressed(const QPointF& position);
 
-	void onMouseRightReleased(const QPointF& position);
+		void onMouseLeftReleased(const QPointF& position);
 
-	void onMousePositionChanged(const QPointF& position);
+		void onMouseRightReleased(const QPointF& position);
 
-	void onKeyPressed(Qt::Key key);
+		void onMousePositionChanged(const QPointF& position);
 
-private:
+		void onKeyPressed(Qt::Key key);
 
-	QSize m_viewportSize;
-	std::shared_ptr<ge::gl::Program> m_shaderProgram = nullptr;
-	std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
-	std::shared_ptr<ge::sg::Scene> m_scene = nullptr;
-	std::unique_ptr<ge::util::CameraTransform> m_transformCamera = nullptr;
-	std::unique_ptr<ge::util::PerspectiveCamera> m_perspectiveCamera = nullptr;
-	std::vector<ge::sg::PointLight> m_lights;
-	std::unique_ptr<ge::gl::Buffer> m_lightsBuffer = nullptr;
-	std::unique_ptr<SimpleVT> m_VT = nullptr;
-	std::unique_ptr<ge::sg::SceneAABB> m_boundingBox = nullptr;
-	QQuickWindow* m_window = nullptr;
-	float m_fovy = 45.0f;
-	float m_rotationSpeedCoef = 0.5f;
-	float m_movementSpeedCoef = 0.1f;
-	float m_near = 0.1f;
-	float m_far = 1000.0f;
-	float m_lightPosRange = 2.0f;
-	float m_pointLightRadiusMin = 0.1f;
-	float m_pointLightRadiusMax = 0.5f;
-	bool m_needToProcessScene = false;
-	bool m_needToSetLightUniforms = true;
-	bool m_mouseRightPressed = false;
-	bool m_mouseLeftPressed = false;
-	glm::vec2 m_lastLeftMousePos;
-	glm::vec2 m_lastRightMousePos;
-	CameraType m_cameraType = CameraType::ORBIT;
+	private:
 
-	void resetCamera();
-};
+		QSize m_viewportSize;
+		std::shared_ptr<ge::gl::Program> m_shaderProgram = nullptr;
+		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
+		std::shared_ptr<ge::sg::Scene> m_scene = nullptr;
+		std::unique_ptr<ge::util::CameraTransform> m_transformCamera = nullptr;
+		std::unique_ptr<ge::util::PerspectiveCamera> m_perspectiveCamera = nullptr;
+		std::vector<ge::sg::PointLight> m_lights;
+		std::unique_ptr<ge::gl::Buffer> m_lightsBuffer = nullptr;
+		std::unique_ptr<SimpleVT> m_VT = nullptr;
+		std::unique_ptr<AABB> m_boundingBox = nullptr;
+		QQuickWindow* m_window = nullptr;
+		float m_fovy = 45.0f;
+		float m_rotationSpeedCoef = 0.5f;
+		float m_movementSpeedCoef = 0.1f;
+		float m_near = 0.1f;
+		float m_far = 1000.0f;
+		float m_lightPosRange = 2.0f;
+		float m_pointLightRadiusMin = 0.1f;
+		float m_pointLightRadiusMax = 0.5f;
+		bool m_needToProcessScene = false;
+		bool m_needToSetLightUniforms = true;
+		bool m_mouseRightPressed = false;
+		bool m_mouseLeftPressed = false;
+		glm::vec2 m_lastLeftMousePos;
+		glm::vec2 m_lastRightMousePos;
+		CameraType m_cameraType = CameraType::ORBIT;
+
+		void resetCamera();
+	};
+}

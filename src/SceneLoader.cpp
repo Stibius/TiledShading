@@ -9,7 +9,7 @@
 #include <QUrl>
 #include <QDebug>
 
-void SceneLoader::loadScene(const QUrl& sceneFile)
+void ts::SceneLoader::loadScene(const QUrl& sceneFile)
 {
 	//model loading
 	QString modelFileName(sceneFile.toLocalFile());
@@ -28,7 +28,7 @@ void SceneLoader::loadScene(const QUrl& sceneFile)
 	}
 }
 
-void SceneLoader::loadImages(ge::sg::Scene& scene, const std::string & imageDir)
+void ts::SceneLoader::loadImages(ge::sg::Scene& scene, const std::string & imageDir)
 {
 	std::shared_ptr<ge::sg::DefaultImage> defaultImage(std::make_shared<ge::sg::DefaultImage>());
 

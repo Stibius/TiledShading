@@ -12,35 +12,38 @@ namespace ge
 	}
 }
 
-class SceneLoader : public QObject
+namespace ts
 {
-	Q_OBJECT
+	class SceneLoader : public QObject
+	{
+		Q_OBJECT
 
-public:
+	public:
 
-	SceneLoader() = default;
+		SceneLoader() = default;
 
-	virtual ~SceneLoader() = default;
+		virtual ~SceneLoader() = default;
 
-public slots:
+	public slots:
 
-	void loadScene(const QUrl& sceneFile);
+		void loadScene(const QUrl& sceneFile);
 
-signals:
+	signals:
 
-	void sceneLoaded(std::shared_ptr<ge::sg::Scene> scene);
+		void sceneLoaded(std::shared_ptr<ge::sg::Scene> scene);
 
-	void sceneLoadingFailed();
+		void sceneLoadingFailed();
 
-private:
+	private:
 
-	/**
-	* Simple function that loads images that are found at image components of materials
-	* and populate its image property.
-	*
-	* \warning Assumes relative texture file paths or empty imageDir. There should be an extended check
-	*          in production code.
-	*/
-	void loadImages(ge::sg::Scene& scene, const std::string& imageDir);
+		/**
+		* Simple function that loads images that are found at image components of materials
+		* and populate its image property.
+		*
+		* \warning Assumes relative texture file paths or empty imageDir. There should be an extended check
+		*          in production code.
+		*/
+		void loadImages(ge::sg::Scene& scene, const std::string& imageDir);
 
-};
+	};
+}
