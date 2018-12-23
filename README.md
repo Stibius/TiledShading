@@ -1,4 +1,4 @@
-# TiledShading
+# Tiled Shading
 
 Application demonstrating the Tiled Shading rendering technique.
 
