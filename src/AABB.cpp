@@ -1,4 +1,5 @@
 #include <AABB.h>
+
 #include <geSG/Scene.h>
 
 ts::AABB::AABB(const ge::sg::Scene& scene)

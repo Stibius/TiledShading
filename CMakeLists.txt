@@ -9,7 +9,7 @@ set( CMAKE_AUTORCC ON )
 set( CMAKE_AUTOUIC ON )
 set( CMAKE_AUTOMOC ON )
 
-find_package(Qt5 QUIET REQUIRED COMPONENTS Quick)
+find_package(Qt5 QUIET REQUIRED COMPONENTS Quick Concurrent)
 find_package(glm QUIET REQUIRED)
 
 find_path(GPUEngine_INCLUDE_DIR NAMES geGL/Generated/ContextCalls.h)
@@ -57,7 +57,15 @@ set(HEADER_FILES
    src/SimpleVT.h
    src/VisualizationTechnique.h
    src/AABB.h
-   src/SceneLoader.h
+   src/SceneLoadingHandler.h
+   src/PointLight.h
+   src/Application.h
+   src/LightsGenerationHandler.h
+   src/Scene.h
+   src/Camera.h
+   src/CameraSettingsHandler.h
+   src/MouseEventHandler.h
+   src/KeyEventHandler.h
    ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.h
    ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.h
    ${AssimpModelLoader_INCLUDE_DIR}/UnicodeIOStream.h
@@ -71,7 +79,14 @@ if(WIN32)
        src/RendererQQuickItem.cpp
        src/SimpleVT.cpp
        src/AABB.cpp
-       src/SceneLoader.cpp
+       src/SceneLoadingHandler.cpp
+       src/Application.cpp
+	   src/LightsGenerationHandler.cpp
+	   src/Scene.cpp
+	   src/Camera.cpp
+	   src/CameraSettingsHandler.cpp
+	   src/MouseEventHandler.cpp
+	   src/KeyEventHandler.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/UnicodeIOStream.cpp
@@ -84,7 +99,14 @@ else()
        src/RendererQQuickItem.cpp
        src/SimpleVT.cpp
        src/AABB.cpp
-       src/SceneLoader.cpp
+       src/SceneLoadingHandler.cpp
+       src/Application.cpp
+	   src/LightsGenerationHandler.cpp
+	   src/Scene.cpp
+	   src/Camera.cpp
+	   src/CameraSettingsHandler.cpp
+	   src/MouseEventHandler.cpp
+	   src/KeyEventHandler.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/UnicodeIOStream.cpp
@@ -125,6 +147,7 @@ target_include_directories(${APP_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src
                                        PUBLIC ${ste_INCLUDE_DIR})                                     
 
 target_link_libraries(${APP_NAME} Qt5::Quick 
+                                  Qt5::Concurrent
                                   glm
                                   optimized ${geCore_LIBRARY_RELEASE}
                                   optimized ${geGL_LIBRARY_RELEASE}

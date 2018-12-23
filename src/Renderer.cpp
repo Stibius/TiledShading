@@ -1,39 +1,34 @@
 ﻿#include <Renderer.h>
-#include <QtQuick/qquickwindow.h>
+#include <PointLight.h>
+#include <SimpleVT.h>
+#include <Camera.h>
+
 #include <geGL/geGL.h>
 #include <geCore/Text.h>
 #include <geSG/Scene.h>
-#include <geSG/AABB.h>
-#include <Light.h>
 #include <geutil/FreeLookCamera.h>
 #include <geutil/OrbitCamera.h>
 #include <geutil/PerspectiveCamera.h>
 #include <glsg/GLSceneProcessor.h>
-#include <QElapsedTimer>
-#include <SimpleVT.h>
-#include <AABB.h>
-#include <algorithm>
-#include <stdlib.h>
+
+#include <chrono>
 
 ts::Renderer::Renderer()
 {
-	m_transformCamera = std::make_unique<ge::util::OrbitCamera>();
-	m_perspectiveCamera = std::make_unique<ge::util::PerspectiveCamera>();
-	m_boundingBox = std::make_unique<AABB>();
 }
 
-void ts::Renderer::setViewportSize(const QSize& size)
+void ts::Renderer::setViewportSize(int width, int height)
 {
-	m_viewportSize = size;
-	m_perspectiveCamera->setAspect(static_cast<float>(m_viewportSize.width()) / static_cast<float>(m_viewportSize.height()));
-	m_perspectiveCamera->setFovy(glm::radians(m_fovy));
-	m_perspectiveCamera->setNear(m_near);
-	m_perspectiveCamera->setFar(m_far);
+	m_viewPortWidth = width;
+	m_viewPortHeight = height;
+	m_camera->m_perspective->setAspect(static_cast<float>(m_viewPortWidth) / static_cast<float>(m_viewPortHeight));
+	m_camera->m_perspective->setAspect(static_cast<float>(m_viewPortWidth) / static_cast<float>(m_viewPortHeight));
 }
 
-void ts::Renderer::setWindow(QQuickWindow* window)
+void ts::Renderer::setScene(const ge::sg::Scene& scene)
 {
-	m_window = window;
+	m_scene = std::make_shared<ge::sg::Scene>(scene);
+	m_needToProcessScene = true;
 }
 
 void ts::Renderer::setupGLState()
@@ -43,7 +38,7 @@ void ts::Renderer::setupGLState()
 		return;
 	}
 
-	m_glContext->glViewport(0, 0, m_viewportSize.width(), m_viewportSize.height());
+	m_glContext->glViewport(0, 0, m_viewPortWidth, m_viewPortHeight);
 	m_glContext->glClearColor(0.4, 0.4, 0.4, 1.0);
 	m_glContext->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -55,269 +50,26 @@ void ts::Renderer::loadShaders(const std::string& vsPath, const std::string& fsP
 	m_shaderProgram = std::make_shared<ge::gl::Program>(simple_vs, simple_fs);
 }
 
-void ts::Renderer::setScene(std::shared_ptr<ge::sg::Scene> scene)
+void ts::Renderer::setLights(const std::vector<ge::sg::PointLight>& pointLights)
 {
-	m_scene = scene;
-    m_boundingBox->compute(*m_scene);
-	m_needToProcessScene = true;
-	resetCamera();
-	emit redraw();
-}
-
-float ts::Renderer::getFovy() const
-{
-	return m_fovy;
-}
-
-int ts::Renderer::getLightCount() const
-{
-	return m_lights.size();
-}
-
-float ts::Renderer::getLightPosRange() const
-{
-	return m_lightPosRange;
-}
-
-float ts::Renderer::getPointLightRadiusMin() const
-{
-	return m_pointLightRadiusMin;
-}
-
-float ts::Renderer::getPointLightRadiusMax() const
-{
-	return m_pointLightRadiusMax;
-}
-
-float ts::Renderer::getMovementSpeed() const
-{
-	return m_movementSpeedCoef;
-}
-
-ts::Renderer::CameraType ts::Renderer::getCameraType() const
-{
-	return m_cameraType;
-}
-
-void ts::Renderer::setFovy(float value)
-{
-	m_fovy = value;
-	m_perspectiveCamera->setFovy(glm::radians(m_fovy));
-
-	emit redraw();
-}
-
-void ts::Renderer::setMovementSpeed(float value)
-{
-	m_movementSpeedCoef = value;
-}
-
-void ts::Renderer::setLightPosRange(float value)
-{
-	m_lightPosRange = value;
-}
-
-void ts::Renderer::setPointLightRadiusMin(float value)
-{
-	m_pointLightRadiusMin = value;
-}
-
-void ts::Renderer::setPointLightRadiusMax(float value)
-{
-	m_pointLightRadiusMax = value;
-}
-
-void ts::Renderer::generateLights(int count)
-{
-	m_lights.clear();
-	glm::vec3 center = m_boundingBox->getCenter();
-	for (int i = 0; i < count; i++)
-	{
-		ge::sg::PointLight light;
-
-		light.color.r = static_cast<float>(rand()) / RAND_MAX;
-		light.color.g = static_cast<float>(rand()) / RAND_MAX;
-		light.color.b = static_cast<float>(rand()) / RAND_MAX;
-		light.color.a = 1.0f;
-
-		glm::vec3 minPos = m_boundingBox->min * m_lightPosRange;
-		glm::vec3 maxPos = m_boundingBox->max * m_lightPosRange;
-		light.position.x = minPos.x + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.x - minPos.x));
-		light.position.y = minPos.y + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.y - minPos.y));
-		light.position.z = minPos.z + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.z - minPos.z));
-		light.position.w = 1.0f;
-
-		float minRadius = m_pointLightRadiusMin * m_boundingBox->getLongestSide();
-		float maxRadius = m_pointLightRadiusMax * m_boundingBox->getLongestSide();
-		light.radius = minRadius + ((static_cast<float>(rand()) / RAND_MAX) * (maxRadius - minRadius));
-
-		m_lights.push_back(light);
-	}
-
+	m_pointLights = pointLights;
 	m_needToSetLightUniforms = true;
-
-	emit redraw();
 }
 
-void ts::Renderer::setCameraType(CameraType type)
+void ts::Renderer::setCamera(std::shared_ptr<Camera> camera)
 {
-	if (m_cameraType != type && type == CameraType::ORBIT)
-	{
-		m_cameraType = type;
-		m_transformCamera = std::make_unique<ge::util::OrbitCamera>();
-		resetCamera();
-	}
-	else if (m_cameraType != type && type == CameraType::FREELOOK)
-	{
-		m_cameraType = type;
-		m_transformCamera = std::make_unique<ge::util::FreeLookCamera>();
-		resetCamera();
-	}
+	m_camera = camera;
 }
 
-void ts::Renderer::onMouseLeftPressed(const QPointF& position)
-{
-	m_mouseLeftPressed = true;
-	m_lastLeftMousePos = glm::vec2(position.x(), position.y());
-}
-
-void ts::Renderer::onMouseRightPressed(const QPointF& position)
-{
-	m_mouseRightPressed = true;
-	m_lastRightMousePos = glm::vec2(position.x(), position.y());
-}
-
-void ts::Renderer::onMouseLeftReleased(const QPointF& position)
-{
-	m_mouseLeftPressed = false;
-}
-
-void ts::Renderer::onMouseRightReleased(const QPointF& position)
-{
-	m_mouseRightPressed = false;
-}
-
-void ts::Renderer::onMousePositionChanged(const QPointF& position)
-{
-	glm::vec2 pos = glm::vec2(position.x(), position.y());
-
-	ge::util::OrbitCamera* orbitCamera = dynamic_cast<ge::util::OrbitCamera*>(m_transformCamera.get());
-	if (orbitCamera != nullptr)
-	{
-		if (m_mouseLeftPressed)
-		{
-			glm::vec2 diff = pos - m_lastLeftMousePos;
-			orbitCamera->addXAngle(glm::radians(diff.y) * m_rotationSpeedCoef);
-			orbitCamera->addYAngle(glm::radians(diff.x) * m_rotationSpeedCoef);
-			m_lastLeftMousePos = pos;
-		}
-
-		if (m_mouseRightPressed)
-		{
-			float diff = pos.y - m_lastRightMousePos.y;
-			orbitCamera->addDistance(diff * m_movementSpeedCoef * m_boundingBox->getLongestSide());
-			m_lastRightMousePos = pos;
-		}
-
-		emit redraw();
-
-		return;
-	}
-
-	ge::util::FreeLookCamera* freeLookCamera = dynamic_cast<ge::util::FreeLookCamera*>(m_transformCamera.get());
-	if (freeLookCamera != nullptr)
-	{
-		if (m_mouseLeftPressed)
-		{
-			glm::vec2 diff = pos - m_lastLeftMousePos;
-			freeLookCamera->addXAngle(glm::radians(diff.y) * m_rotationSpeedCoef);
-			freeLookCamera->addYAngle(glm::radians(diff.x) * m_rotationSpeedCoef);
-			m_lastLeftMousePos = pos;
-		}
-
-		emit redraw();
-	}
-}
-
-void ts::Renderer::onKeyPressed(Qt::Key key)
-{
-	ge::util::FreeLookCamera* freeLookCamera = dynamic_cast<ge::util::FreeLookCamera*>(m_transformCamera.get());
-	if (freeLookCamera == nullptr)
-	{
-		return;
-	}
-
-	switch (key)
-	{
-	case Qt::Key::Key_W:
-		freeLookCamera->forward(m_movementSpeedCoef * m_boundingBox->getLongestSide());
-		break;
-	case Qt::Key::Key_S:
-		freeLookCamera->back(m_movementSpeedCoef * m_boundingBox->getLongestSide());
-		break;
-	case Qt::Key::Key_A:
-		freeLookCamera->left(m_movementSpeedCoef * m_boundingBox->getLongestSide());
-		break;
-	case Qt::Key::Key_D:
-		freeLookCamera->right(m_movementSpeedCoef * m_boundingBox->getLongestSide());
-		break;
-	case Qt::Key::Key_Space:
-		freeLookCamera->up(m_movementSpeedCoef * m_boundingBox->getLongestSide());
-		break;
-	case Qt::Key::Key_C:
-		freeLookCamera->down(m_movementSpeedCoef * m_boundingBox->getLongestSide());
-		break;
-	default:
-		return;
-	}
-
-	emit redraw();
-}
-
-void ts::Renderer::resetCamera()
-{
-	glm::vec3 center = m_boundingBox->getCenter();
-	float longestSide = m_boundingBox->getLongestSide();
-	float distance = (longestSide / 2) / (std::tan(glm::radians(m_fovy / 2))) + (longestSide);
-
-	m_far = (distance + longestSide) * 10.0f;
-	m_perspectiveCamera->setFar(m_far);
-
-	ge::util::OrbitCamera* orbitCamera = dynamic_cast<ge::util::OrbitCamera*>(m_transformCamera.get());
-	if (orbitCamera != nullptr)
-	{
-		orbitCamera->setFocus(-center);
-		orbitCamera->setDistance(distance);
-		orbitCamera->setAngles(glm::vec2(0.0f, 0.0f));
-
-		emit redraw();
-
-		return;
-	}
-
-	ge::util::FreeLookCamera* freeLookCamera = dynamic_cast<ge::util::FreeLookCamera*>(m_transformCamera.get());
-	if (freeLookCamera != nullptr)
-	{
-		freeLookCamera->setXAngle(0.0f);
-		freeLookCamera->setYAngle(0.0f);
-		freeLookCamera->setZAngle(0.0f);
-		freeLookCamera->setRotation(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
-		freeLookCamera->setPosition(center);
-		freeLookCamera->back(distance);
-
-		emit redraw();
-	}
-}
-
-void ts::Renderer::onRender()
+int ts::Renderer::render()
 {
 	if (m_glContext == nullptr)
 	{
 		//init geGL gl context
 		ge::gl::init();
 		m_glContext = std::make_shared<ge::gl::Context>();
-		m_VT = std::make_unique<SimpleVT>();
-		m_VT->m_glContext = m_glContext;
+		m_visualizationTechnique = std::make_unique<SimpleVT>();
+		m_visualizationTechnique->m_glContext = m_glContext;
 	}
 
 	if (m_shaderProgram == nullptr)
@@ -325,32 +77,40 @@ void ts::Renderer::onRender()
 		//load shaders
 		std::string shaderDir(APP_RESOURCES"/shaders/");
 		loadShaders(ge::core::loadTextFile(shaderDir + "VS.glsl"), ge::core::loadTextFile(shaderDir + "FS.glsl"));
-		m_VT->m_shaderProgram = m_shaderProgram;
+		m_visualizationTechnique->m_shaderProgram = m_shaderProgram;
 	}
 
 	//setup light uniforms
 	if (m_needToSetLightUniforms)
 	{
-		m_shaderProgram->set1i("lightCount", m_lights.size());
+		m_shaderProgram->set1i("lightCount", m_pointLights.size());
 
-		if (m_lights.size() != 0)
+		if (m_pointLights.size() != 0)
 		{
-			m_lightsBuffer = std::make_unique<ge::gl::Buffer>(m_lights.size() * sizeof(ge::sg::PointLight), m_lights.data(), GL_DYNAMIC_DRAW);
+			m_lightsBuffer = std::make_unique<ge::gl::Buffer>(m_pointLights.size() * sizeof(ge::sg::PointLight), m_pointLights.data(), GL_DYNAMIC_DRAW);
 			m_lightsBuffer->bindBase(GL_SHADER_STORAGE_BUFFER, 0);
 		}
 
 		m_needToSetLightUniforms = false;
 	}
-	
-	m_shaderProgram->setMatrix4fv("projection", glm::value_ptr(m_perspectiveCamera->getProjection()));
-	m_shaderProgram->setMatrix4fv("view", glm::value_ptr(m_transformCamera->getView()));
-	m_shaderProgram->set3fv("viewPos", glm::value_ptr(glm::inverse(m_transformCamera->getView()) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-	
+
+	m_shaderProgram->setMatrix4fv("projection", glm::value_ptr(m_camera->m_perspective->getProjection()));
+	if (m_camera->m_orbit)
+	{
+		m_shaderProgram->setMatrix4fv("view", glm::value_ptr(m_camera->m_orbit->getView()));
+		m_shaderProgram->set3fv("viewPos", glm::value_ptr(glm::inverse(m_camera->m_orbit->getView()) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	}
+	else if (m_camera->m_freeLook)
+	{
+		m_shaderProgram->setMatrix4fv("view", glm::value_ptr(m_camera->m_freeLook->getView()));
+		m_shaderProgram->set3fv("viewPos", glm::value_ptr(glm::inverse(m_camera->m_freeLook->getView()) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	}
+
 	if (m_needToProcessScene)
 	{
-		std::shared_ptr<ge::glsg::GLScene> m_glScene = ge::glsg::GLSceneProcessor::processScene(std::move(m_scene), m_glContext);
-		m_VT->setScene(m_glScene);
-		m_VT->processScene();
+		std::shared_ptr<ge::glsg::GLScene> m_glScene = ge::glsg::GLSceneProcessor::processScene(m_scene, m_glContext);
+		m_visualizationTechnique->setScene(m_glScene);
+		m_visualizationTechnique->processScene();
 		m_needToProcessScene = false;
 	}
 
@@ -358,18 +118,14 @@ void ts::Renderer::onRender()
 
 	m_glContext->glFinish();
 
-	QElapsedTimer timer;
-	timer.start();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-	m_VT->draw();
+	m_visualizationTechnique->draw();
 
 	m_glContext->glFinish();
 
-	static bool firstDraw = true; // updating rendering time in the GUI causes another redraw, only do it once
-	if (firstDraw) emit renderingFinished(static_cast<float>(timer.nsecsElapsed()) / 1000000);
-	firstDraw = !firstDraw;
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<int64_t, std::micro> elapsed = std::chrono::duration_cast<std::chrono::duration<int64_t, std::micro>>(t2 - t1);
 
-	// Not strictly needed for this example, but generally useful for when
-	// mixing with raw OpenGL.
-	m_window->resetOpenGLState();
+	return elapsed.count();
 }

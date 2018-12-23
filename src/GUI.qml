@@ -17,6 +17,28 @@ ApplicationWindow
     visible: true
 	color: "black"
 
+	Connections 
+	{
+        target: sceneLoadingHandler 
+        onSceneLoaded:
+		{
+			loadSceneAction.enabled = true;
+
+			loadingModelText.text = qsTr("Scene loaded successfully");
+        }
+    }
+
+	Connections 
+	{
+        target: sceneLoadingHandler 
+        onSceneLoadingFailed:
+		{
+		    loadSceneAction.enabled = true;
+
+			loadingModelText.text = qsTr("Scene loading failed");
+        }
+    }
+
 	footer: ToolBar 
 	{
 	    height: 25
@@ -40,8 +62,7 @@ ApplicationWindow
 
 				Layout.alignment: Qt.AlignRight
 
-			    text: qsTr("Loading model...")
-				visible: rendererItem.sceneLoading
+			    text: qsTr("")
 			}
         }
     }
@@ -55,7 +76,9 @@ ApplicationWindow
 
         onAccepted: 
 	    {
-            rendererItem.loadScene(loadSceneDialog.fileUrl);
+			loadSceneAction.enabled = false;
+			loadingModelText.text = qsTr("Loading scene...")
+			sceneLoadingHandler.startLoading(loadSceneDialog.fileUrl)
         }
     }
 
@@ -64,7 +87,6 @@ ApplicationWindow
         id: loadSceneAction
 
         text: "Load scene"
-		enabled: !rendererItem.sceneLoading
 
         onTriggered: 
 		{
@@ -101,53 +123,10 @@ ApplicationWindow
     RendererItem 
 	{  
 	    id: rendererItem
+		objectName: "rendererItem"
 
 		anchors.fill: parent
 		focus: true
-
-		MouseArea 
-		{  
-            anchors.fill: parent;
-
-			acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-			onPressed: 
-			{
-			    if (mouse.button == Qt.LeftButton)
-			        rendererItem.mouseLeftPressed(Qt.point(mouse.x, mouse.y));
-			    else if (mouse.button == Qt.RightButton)
-				    rendererItem.mouseRightPressed(Qt.point(mouse.x, mouse.y));
-			}
-
-            onReleased: 
-			{
-			    if (mouse.button == Qt.LeftButton)
-			        rendererItem.mouseLeftReleased(Qt.point(mouse.x, mouse.y));
-			    else if (mouse.button == Qt.RightButton)
-				    rendererItem.mouseRightReleased(Qt.point(mouse.x, mouse.y));
-			}
-
-            onPositionChanged: rendererItem.mousePositionChanged(Qt.point(mouse.x, mouse.y));
-        }
-
-		Keys.onPressed: 
-		{
-		    switch (event.key)
-			{
-				case Qt.Key_W:
-				case Qt.Key_S:
-				case Qt.Key_A:
-				case Qt.Key_D:
-				case Qt.Key_Space:
-				case Qt.Key_C:
-				    rendererItem.keyPressed(event.key);
-				    break;
-				default:
-				    break;
-			}
-
-			event.accepted = true;
-        }
     }
 
 	Window
@@ -155,23 +134,23 @@ ApplicationWindow
         id: settingsWindow
 
 		width: 500
-        height: 400
+        height: 500
 
 		title: "Settings"
         visible: false
 
 		onClosing: 
 		{
-		    sbLightCount.value = rendererItem.lightCount;
-			sbLightPosRange.value = rendererItem.lightPosRange;
-			sbPointLightRadiusMin.value = rendererItem.pointLightRadiusMin;
-			sbPointLightRadiusMax.value = rendererItem.pointLightRadiusMax;
+			sbLightCount.value = sbLightCount.oldValue;
+			sbLightPosRange.value = sbLightPosRange.oldValue;
+			sbPointLightRadiusMin.value = sbPointLightRadiusMin.oldValue;
+			sbPointLightRadiusMax.value = sbPointLightRadiusMax.oldValue;
 		}
 
 		GridLayout 
 		{
             columns: 4
-			rows: 7
+			rows: 9
             rowSpacing: 10
             columnSpacing: 10
             anchors.top: parent.top;
@@ -202,9 +181,9 @@ ApplicationWindow
 				    ButtonGroup.group: cameraTypeGroup
 
                     text: "Orbit"
-                    checked: rendererItem.cameraType == RendererItem.ORBIT
+                    checked: cameraSettingsHandler.cameraType == CameraSettingsHandler.ORBIT
                 
-			        onClicked: rendererItem.cameraType = RendererItem.ORBIT;
+			        onClicked: cameraSettingsHandler.cameraType = CameraSettingsHandler.ORBIT;
                 }
                 RadioButton 
 			    {
@@ -212,9 +191,9 @@ ApplicationWindow
 				    ButtonGroup.group: cameraTypeGroup
 
                     text: "Freelook"
-				    checked: rendererItem.cameraType == RendererItem.FREELOOK
+				    checked: cameraSettingsHandler.cameraType == CameraSettingsHandler.FREELOOK
 
-			        onClicked: rendererItem.cameraType = RendererItem.FREELOOK;
+			        onClicked: cameraSettingsHandler.cameraType = CameraSettingsHandler.FREELOOK;
                 }
 			}
 
@@ -232,7 +211,7 @@ ApplicationWindow
 				Layout.column: 1
                 Layout.row: 1
 				
-                value: rendererItem.fovy
+                value: cameraSettingsHandler.fovy
                 from: 0
 				to: 180 
 				editable: true
@@ -247,13 +226,8 @@ ApplicationWindow
                     return Number.fromLocaleString(locale, text);
                 }
 
-				onValueChanged: 
-				{
-				    if (value != rendererItem.fovy)
-					{
-					    rendererItem.fovy = value;
-					}
-				}
+				Binding { target: sbFovy; property: "value"; value: cameraSettingsHandler.fovy }
+                Binding { target: cameraSettingsHandler; property: "fovy"; value: sbFovy.value }
             }
 
 			Label 
@@ -261,16 +235,16 @@ ApplicationWindow
 				Layout.column: 0
                 Layout.row: 2
 
-                text: "Movement speed:"
+                text: "Freelook step size:"
             }
 			SpinBox 
 			{
-                id: sbMovementSpeed
+                id: sbStepSize
 
 				Layout.column: 1
                 Layout.row: 2
 
-                value: rendererItem.movementSpeed
+                value: cameraSettingsHandler.relativeStepSize * 1000
                 from: 0
 				to: 1000
 				stepSize: 100
@@ -280,7 +254,7 @@ ApplicationWindow
 
 				textFromValue: function(value, locale) 
 				{
-                    return Number(value / 1000).toLocaleString(locale, 'f', sbMovementSpeed.decimals)
+                    return Number(value / 1000).toLocaleString(locale, 'f', sbStepSize.decimals)
                 }
 
                 valueFromText: function(text, locale) 
@@ -288,19 +262,86 @@ ApplicationWindow
                     return Number.fromLocaleString(locale, text) * 1000
                 }
 				
-				onValueChanged: 
-				{
-				    if (value != rendererItem.movementSpeed)
-					{
-					    rendererItem.movementSpeed = value;
-					}
-				}
+				Binding { target: sbStepSize; property: "value"; value: cameraSettingsHandler.relativeStepSize * 1000 }
+                Binding { target: cameraSettingsHandler; property: "relativeStepSize"; value: sbStepSize.value / 1000 }
             }
 
 			Label 
 			{
 				Layout.column: 0
                 Layout.row: 3
+
+                text: "Orbit zooming speed:"
+            }
+			SpinBox 
+			{
+                id: sbZoomSpeed
+
+				Layout.column: 1
+                Layout.row: 3
+
+                value: cameraSettingsHandler.relativeZoomSpeed * 1000
+                from: 0
+				to: 1000
+				stepSize: 100
+				editable: true
+
+				property int decimals: 3
+
+				textFromValue: function(value, locale) 
+				{
+                    return Number(value / 1000).toLocaleString(locale, 'f', sbZoomSpeed.decimals)
+                }
+
+                valueFromText: function(text, locale) 
+				{
+                    return Number.fromLocaleString(locale, text) * 1000
+                }
+				
+				Binding { target: sbZoomSpeed; property: "value"; value: cameraSettingsHandler.relativeZoomSpeed * 1000 }
+                Binding { target: cameraSettingsHandler; property: "relativeZoomSpeed"; value: sbZoomSpeed.value / 1000 }
+            }
+
+			Label 
+			{
+				Layout.column: 0
+                Layout.row: 4
+
+                text: "Rotation speed:"
+            }
+			SpinBox 
+			{
+                id: sbRotationSpeed
+
+				Layout.column: 1
+                Layout.row: 4
+
+                value: cameraSettingsHandler.rotationSpeed * 1000
+                from: 0
+				to: 1000
+				stepSize: 100
+				editable: true
+
+				property int decimals: 3
+
+				textFromValue: function(value, locale) 
+				{
+                    return Number(value / 1000).toLocaleString(locale, 'f', sbRotationSpeed.decimals)
+                }
+
+                valueFromText: function(text, locale) 
+				{
+                    return Number.fromLocaleString(locale, text) * 1000
+                }
+				
+				Binding { target: sbRotationSpeed; property: "value"; value: cameraSettingsHandler.rotationSpeed * 1000 }
+                Binding { target: cameraSettingsHandler; property: "rotationSpeed"; value: sbRotationSpeed.value / 1000 }
+            }
+
+			Label 
+			{
+				Layout.column: 0
+                Layout.row: 5
 
                 text: "Light count:"
             }
@@ -309,9 +350,11 @@ ApplicationWindow
                 id: sbLightCount
 
 				Layout.column: 1
-                Layout.row: 3
+                Layout.row: 5
 
-                value: rendererItem.lightCount
+				property int oldValue: 0;
+
+                value: 0
                 from: 0
 				to: 10000
 				editable: true
@@ -320,7 +363,7 @@ ApplicationWindow
 			Label 
 			{
 				Layout.column: 0
-                Layout.row: 4
+                Layout.row: 6
 
                 text: "Light position range:"
             }
@@ -329,9 +372,11 @@ ApplicationWindow
                 id: sbLightPosRange
 
 				Layout.column: 1
-                Layout.row: 4
+                Layout.row: 6
 
-                value: rendererItem.lightPosRange
+				property int oldValue: 2000;
+
+				value: 2000
                 from: 0
 				to: 100000
 				stepSize: 100
@@ -353,7 +398,7 @@ ApplicationWindow
 			Label 
 			{
 				Layout.column: 0
-                Layout.row: 5
+                Layout.row: 7
 
                 text: "Point light radius:"
             }
@@ -362,9 +407,11 @@ ApplicationWindow
                 id: sbPointLightRadiusMin
 
 				Layout.column: 1
-                Layout.row: 5
+                Layout.row: 7
 
-                value: rendererItem.pointLightRadiusMin
+				property int oldValue: 100;
+
+				value: 100
                 from: 0
 				to: 100000
 				stepSize: 100
@@ -385,7 +432,7 @@ ApplicationWindow
 			Label 
 			{
 				Layout.column: 2
-                Layout.row: 5
+                Layout.row: 7
 
                 text: "-"
             }
@@ -394,9 +441,11 @@ ApplicationWindow
                 id: sbPointLightRadiusMax
 
 				Layout.column: 3
-                Layout.row: 5
+                Layout.row: 7
 
-                value: rendererItem.pointLightRadiusMax
+				property int oldValue: 500;
+
+				value: 500
                 from: 0
 				to: 100000
 				stepSize: 100
@@ -418,30 +467,28 @@ ApplicationWindow
 			Button 
 			{
 			    Layout.column: 1
-                Layout.row: 6
+                Layout.row: 8
 
                 text: "Generate lights"
 
 				onClicked: 
 				{
-				    if (sbLightPosRange.value != rendererItem.lightPosRange)
-					{
-					    rendererItem.lightPosRange = sbLightPosRange.value;
-					}
 					if (sbPointLightRadiusMin.value > sbPointLightRadiusMax.value)
 					{
 					    sbPointLightRadiusMax.value = sbPointLightRadiusMin.value;
 					}
-					if (sbPointLightRadiusMin.value != rendererItem.pointLightRadiusMin)
-					{
-					    rendererItem.pointLightRadiusMin = sbPointLightRadiusMin.value;
-					}
-					if (sbPointLightRadiusMax.value != rendererItem.pointLightRadiusMax)
-					{
-					    rendererItem.pointLightRadiusMax = sbPointLightRadiusMax.value;
-					}
 
-				    rendererItem.lightCount = sbLightCount.value;
+					sbLightCount.oldValue = sbLightCount.value;
+					sbLightPosRange.oldValue = sbLightPosRange.value;
+					sbPointLightRadiusMin.oldValue = sbPointLightRadiusMin.value;
+					sbPointLightRadiusMax.oldValue = sbPointLightRadiusMax.value;
+
+					var count = sbLightCount.value;
+					var posRange = sbLightPosRange.value / 1000;
+					var radiusMin = sbPointLightRadiusMin.value / 1000;
+					var radiusMax = sbPointLightRadiusMax.value / 1000;
+
+					lightsGenerationHandler.generate(count, posRange, radiusMin, radiusMax);
 				}
             }
         }

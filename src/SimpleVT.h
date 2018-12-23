@@ -20,7 +20,6 @@ namespace ge
 	namespace sg 
 	{
 		class Scene;
-		class Light;
 	}
 	namespace glsg
 	{

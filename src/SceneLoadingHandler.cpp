@@ -1,15 +1,32 @@
-#include <SceneLoader.h>
+#include <SceneLoadingHandler.h>
+#include <Renderer.h>
+#include <Scene.h>
+#include <AABB.h>
+#include <AssimpModelLoader.h>
+#include <assimp/postprocess.h>
 
 #include <geSG/Scene.h>
 #include <geSG/DefaultImage.h>
-#include <AssimpModelLoader.h>
-#include <assimp/postprocess.h>
+
 #include <QtImageLoader.h>
 #include <QFileInfo>
 #include <QUrl>
-#include <QDebug>
+#include <QtConcurrent>
 
-void ts::SceneLoader::loadScene(const QUrl& sceneFile)
+ts::SceneLoadingHandler::SceneLoadingHandler(Scene* scene, Renderer* renderer)
+	: m_renderer(renderer)
+	, m_scene(scene)
+{
+
+}
+
+void ts::SceneLoadingHandler::init(Scene* scene, Renderer* renderer)
+{
+	m_renderer = renderer;
+	m_scene = scene;
+}
+
+std::shared_ptr<ge::sg::Scene> ts::SceneLoadingHandler::loadScene(const QUrl& sceneFile) const
 {
 	//model loading
 	QString modelFileName(sceneFile.toLocalFile());
@@ -17,18 +34,15 @@ void ts::SceneLoader::loadScene(const QUrl& sceneFile)
 	std::string modelPath(qUtf8Printable(fi.canonicalPath() + "/"));
 	std::shared_ptr<ge::sg::Scene> scene(AssimpModelLoader::loadScene(modelFileName.toUtf8().constData(), aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_GenSmoothNormals));
 
-	if (!scene || scene->models.empty())
-	{
-		emit sceneLoadingFailed();
-	}
-	else
+	if (scene && !scene->models.empty())
 	{
 		loadImages(*scene, modelPath);
-		emit sceneLoaded(scene);
 	}
+
+	return scene;
 }
 
-void ts::SceneLoader::loadImages(ge::sg::Scene& scene, const std::string & imageDir)
+void ts::SceneLoadingHandler::loadImages(ge::sg::Scene& scene, const std::string & imageDir) const
 {
 	std::shared_ptr<ge::sg::DefaultImage> defaultImage(std::make_shared<ge::sg::DefaultImage>());
 
@@ -54,5 +68,33 @@ void ts::SceneLoader::loadImages(ge::sg::Scene& scene, const std::string & image
 				}
 			}
 		}
+	}
+}
+
+void ts::SceneLoadingHandler::startLoading(const QUrl& sceneFile)
+{
+	if (!m_initialized)
+	{
+		QObject::connect(&sceneFutureWatcher, &QFutureWatcher<std::shared_ptr<ge::sg::Scene>>::finished, this, &ts::SceneLoadingHandler::loadingFinished);
+		m_initialized = true;
+	}
+
+	sceneFuture = QtConcurrent::run(this, &SceneLoadingHandler::loadScene, sceneFile);
+	sceneFutureWatcher.setFuture(sceneFuture);
+}
+
+void ts::SceneLoadingHandler::loadingFinished()
+{
+	std::shared_ptr<ge::sg::Scene> scene = sceneFuture.result();
+	if (!scene || scene->models.empty())
+	{
+		emit sceneLoadingFailed();
+	}
+	else
+	{
+		m_scene->setScene(*scene);
+		m_renderer->setScene(*scene);
+		
+		emit sceneLoaded();
 	}
 }

@@ -9,9 +9,6 @@
 #include <geGL/Texture.h>
 #include <glsg/EnumToGL.h>
 #include <geGL/geGL.h>
-#include <geSG/Light.h>
-
-#include <QDebug>
 
 using namespace std;
 using namespace ge::gl;
