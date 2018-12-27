@@ -1,21 +1,5 @@
 #pragma once
 
-namespace ge 
-{
-	namespace gl
-	{
-		class Context;
-		class Program;
-	}
-
-	namespace sg 
-	{
-		class MatrixTransform;
-		class Material;
-		class Mesh;
-	}
-}
-
 namespace ts
 {
 	/**

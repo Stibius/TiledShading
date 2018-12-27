@@ -54,7 +54,8 @@ set(RESOURCE_FILES
 set(HEADER_FILES
    src/Renderer.h
    src/RendererQQuickItem.h
-   src/SimpleVT.h
+   src/PhongVT.h
+   src/LightedSceneVT.h
    src/VisualizationTechnique.h
    src/AABB.h
    src/SceneLoadingHandler.h
@@ -77,7 +78,8 @@ if(WIN32)
        src/main.cpp
        src/Renderer.cpp
        src/RendererQQuickItem.cpp
-       src/SimpleVT.cpp
+       src/PhongVT.cpp
+	   src/LightedSceneVT.cpp
        src/AABB.cpp
        src/SceneLoadingHandler.cpp
        src/Application.cpp
@@ -97,7 +99,8 @@ else()
        src/main.cpp
        src/Renderer.cpp
        src/RendererQQuickItem.cpp
-       src/SimpleVT.cpp
+       src/PhongVT.cpp
+	   src/LightedSceneVT.cpp
        src/AABB.cpp
        src/SceneLoadingHandler.cpp
        src/Application.cpp
@@ -132,8 +135,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 # Define a grouping for source files in IDE project generation
 source_group("Header Files" FILES ${HEADER_FILES})
 
-set(DEFAULT_RESOERCES_PATH "${CMAKE_CURRENT_LIST_DIR}/resources")
-set(${APP_NAME}_RESOURCES "${DEFAULT_RESOERCES_PATH}" CACHE PATH "Relative or absolute path to Application resources.")
+#set(DEFAULT_RESOERCES_PATH "${CMAKE_CURRENT_LIST_DIR}/resources")
+#set(${APP_NAME}_RESOURCES "${DEFAULT_RESOERCES_PATH}" CACHE PATH "Relative or absolute path to Application resources.")
 
 add_executable(${APP_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${GUI_FILES} ${RESOURCE_FILES} ${GLSG_FILES} ${SHADER_FILES})
 

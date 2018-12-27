@@ -1,7 +1,8 @@
 ﻿#include <Renderer.h>
 #include <PointLight.h>
-#include <SimpleVT.h>
 #include <Camera.h>
+#include <LightedSceneVT.h>
+#include <PhongVT.h>
 
 #include <geGL/geGL.h>
 #include <geCore/Text.h>
@@ -50,6 +51,12 @@ void ts::Renderer::loadShaders(const std::string& vsPath, const std::string& fsP
 	m_shaderProgram = std::make_shared<ge::gl::Program>(simple_vs, simple_fs);
 }
 
+void ts::Renderer::setVisualizationTechnique(std::unique_ptr<LightedSceneVT> visualizationTechnique)
+{
+	m_lightedSceneVT = std::move(visualizationTechnique);
+	m_needToInitVT = true;
+}
+
 void ts::Renderer::setLights(const std::vector<ge::sg::PointLight>& pointLights)
 {
 	m_pointLights = pointLights;
@@ -68,59 +75,62 @@ int ts::Renderer::render()
 		//init geGL gl context
 		ge::gl::init();
 		m_glContext = std::make_shared<ge::gl::Context>();
-		m_visualizationTechnique = std::make_unique<SimpleVT>();
-		m_visualizationTechnique->m_glContext = m_glContext;
 	}
+
+	setupGLState();
+
+	//if (m_lightedSceneVT == nullptr)
+	//{
+	//return 0;
+	//}
 
 	if (m_shaderProgram == nullptr)
 	{
 		//load shaders
 		std::string shaderDir(APP_RESOURCES"/shaders/");
 		loadShaders(ge::core::loadTextFile(shaderDir + "VS.glsl"), ge::core::loadTextFile(shaderDir + "FS.glsl"));
-		m_visualizationTechnique->m_shaderProgram = m_shaderProgram;
 	}
 
-	//setup light uniforms
-	if (m_needToSetLightUniforms)
-	{
-		m_shaderProgram->set1i("lightCount", m_pointLights.size());
+	std::unique_ptr<PhongVT> phongVT = std::make_unique<PhongVT>();
+	phongVT->m_shaderProgram = m_shaderProgram;
+	setVisualizationTechnique(std::move(phongVT));
 
-		if (m_pointLights.size() != 0)
-		{
-			m_lightsBuffer = std::make_unique<ge::gl::Buffer>(m_pointLights.size() * sizeof(ge::sg::PointLight), m_pointLights.data(), GL_DYNAMIC_DRAW);
-			m_lightsBuffer->bindBase(GL_SHADER_STORAGE_BUFFER, 0);
-		}
-
-		m_needToSetLightUniforms = false;
-	}
-
-	m_shaderProgram->setMatrix4fv("projection", glm::value_ptr(m_camera->m_perspective->getProjection()));
-	if (m_camera->m_orbit)
+	if (m_needToInitVT)
 	{
-		m_shaderProgram->setMatrix4fv("view", glm::value_ptr(m_camera->m_orbit->getView()));
-		m_shaderProgram->set3fv("viewPos", glm::value_ptr(glm::inverse(m_camera->m_orbit->getView()) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-	}
-	else if (m_camera->m_freeLook)
-	{
-		m_shaderProgram->setMatrix4fv("view", glm::value_ptr(m_camera->m_freeLook->getView()));
-		m_shaderProgram->set3fv("viewPos", glm::value_ptr(glm::inverse(m_camera->m_freeLook->getView()) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		m_lightedSceneVT->m_glContext = m_glContext;
+		if (!m_needToProcessScene) m_lightedSceneVT->setScene(m_glScene);
+		if (!m_needToSetLightUniforms) m_lightedSceneVT->setLights(m_pointLights);
+		m_needToInitVT = false;
 	}
 
 	if (m_needToProcessScene)
 	{
-		std::shared_ptr<ge::glsg::GLScene> m_glScene = ge::glsg::GLSceneProcessor::processScene(m_scene, m_glContext);
-		m_visualizationTechnique->setScene(m_glScene);
-		m_visualizationTechnique->processScene();
+		m_glScene = ge::glsg::GLSceneProcessor::processScene(m_scene, m_glContext);
+		m_lightedSceneVT->setScene(m_glScene);
 		m_needToProcessScene = false;
 	}
 
-	setupGLState();
+	if (m_needToSetLightUniforms)
+	{
+		m_lightedSceneVT->setLights(m_pointLights);
+		m_needToSetLightUniforms = false;
+	}
+
+	m_lightedSceneVT->setProjectionMatrix(m_camera->m_perspective->getProjection());
+	if (m_camera->m_orbit)
+	{
+		m_lightedSceneVT->setViewMatrix(m_camera->m_orbit->getView());
+	}
+	else if (m_camera->m_freeLook)
+	{
+		m_lightedSceneVT->setViewMatrix(m_camera->m_freeLook->getView());
+	}
 
 	m_glContext->glFinish();
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-	m_visualizationTechnique->draw();
+	m_lightedSceneVT->draw();
 
 	m_glContext->glFinish();
 

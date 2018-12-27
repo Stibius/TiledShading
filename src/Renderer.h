@@ -22,12 +22,17 @@ namespace ge
 		class Scene;
 		struct PointLight;
 	}
+
+	namespace glsg
+	{
+		class GLScene;
+	}
 }
 
 namespace ts
 {
-	class SimpleVT;
 	class Camera;
+	class LightedSceneVT;
 
 	class Renderer 
 	{
@@ -50,6 +55,8 @@ namespace ts
 
 		void loadShaders(const std::string& vsPath, const std::string& fsPath);
 
+		virtual void setVisualizationTechnique(std::unique_ptr<LightedSceneVT> visualizationTechnique);
+
 		virtual void setScene(const ge::sg::Scene& scene);
 
 		virtual void setLights(const std::vector<ge::sg::PointLight>& pointLights);
@@ -65,12 +72,14 @@ namespace ts
 		std::shared_ptr<ge::gl::Program> m_shaderProgram = nullptr;
 		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
 		std::shared_ptr<ge::sg::Scene> m_scene = nullptr;
+		std::shared_ptr<ge::glsg::GLScene> m_glScene = nullptr;
 		std::shared_ptr<Camera> m_camera = nullptr;
 		std::vector<ge::sg::PointLight> m_pointLights;
 		std::unique_ptr<ge::gl::Buffer> m_lightsBuffer = nullptr;
-		std::unique_ptr<SimpleVT> m_visualizationTechnique = nullptr;
+		std::unique_ptr<LightedSceneVT> m_lightedSceneVT = nullptr;
 		bool m_needToProcessScene = false;
 		bool m_needToSetLightUniforms = true;
+		bool m_needToInitVT = false;
 
 		virtual void setupGLState();
 	};

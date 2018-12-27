@@ -15,6 +15,7 @@
 #include <QQmlContext>
 
 #include <geSG/Scene.h>
+#include <geCore/Text.h>
 
 bool Application::m_initialized = false;
 QGuiApplication* Application::m_qGuiApplication = nullptr;
@@ -87,7 +88,7 @@ int Application::run()
 	QObject::connect(&m_cameraSettingsHandler, &ts::CameraSettingsHandler::absoluteStepSizeChanged, &m_keyEventHandler, &ts::KeyEventHandler::absoluteStepSizeChanged);
 	QObject::connect(&m_cameraSettingsHandler, &ts::CameraSettingsHandler::absoluteZoomSpeedChanged, &m_mouseEventHandler, &ts::MouseEventHandler::absoluteZoomSpeedChanged);
 	QObject::connect(&m_cameraSettingsHandler, &ts::CameraSettingsHandler::rotationSpeedChanged, &m_mouseEventHandler, &ts::MouseEventHandler::rotationSpeedChanged);
-	
+
 	return m_qGuiApplication->exec();
 }
 
