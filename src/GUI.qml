@@ -147,350 +147,390 @@ ApplicationWindow
 			sbPointLightRadiusMax.value = sbPointLightRadiusMax.oldValue;
 		}
 
-		GridLayout 
+        TabBar 
 		{
-            columns: 4
-			rows: 9
-            rowSpacing: 10
-            columnSpacing: 10
-            anchors.top: parent.top;
-			anchors.left: parent.left;
-			anchors.topMargin: 10
-			anchors.leftMargin: 10
+            id: bar
+            width: parent.width
 
-			Label 
+            TabButton 
 			{
-				Layout.column: 0
-                Layout.row: 0
-
-                text: "Camera type:"
+                text: qsTr("Camera")
             }
-			RowLayout
+            TabButton 
 			{
-			    Layout.columnSpan: 3
-                spacing: 10
-
-				ButtonGroup 
-			    { 
-			        id: cameraTypeGroup 
-				    exclusive: true
-			    }
-				RadioButton 
-			    {
-                    Layout.column: 0
-				    ButtonGroup.group: cameraTypeGroup
-
-                    text: "Orbit"
-                    checked: cameraSettingsHandler.cameraType == CameraSettingsHandler.ORBIT
-                
-			        onClicked: cameraSettingsHandler.cameraType = CameraSettingsHandler.ORBIT;
-                }
-                RadioButton 
-			    {
-			        Layout.column: 1
-				    ButtonGroup.group: cameraTypeGroup
-
-                    text: "Freelook"
-				    checked: cameraSettingsHandler.cameraType == CameraSettingsHandler.FREELOOK
-
-			        onClicked: cameraSettingsHandler.cameraType = CameraSettingsHandler.FREELOOK;
-                }
-			}
-
-			Label 
-			{
-				Layout.column: 0
-                Layout.row: 1
-
-                text: "Field of view:"
+                text: qsTr("Lights")
             }
-			SpinBox 
+            TabButton 
 			{
-                id: sbFovy
-
-				Layout.column: 1
-                Layout.row: 1
-				
-                value: cameraSettingsHandler.fovy
-                from: 0
-				to: 180 
-				editable: true
-
-				textFromValue: function(value, locale) 
-				{
-                    return Number(value).toLocaleString(locale, 'f', 0);
-                }
-
-                valueFromText: function(text, locale) 
-				{
-                    return Number.fromLocaleString(locale, text);
-                }
-
-				Binding { target: sbFovy; property: "value"; value: cameraSettingsHandler.fovy }
-                Binding { target: cameraSettingsHandler; property: "fovy"; value: sbFovy.value }
-            }
-
-			Label 
-			{
-				Layout.column: 0
-                Layout.row: 2
-
-                text: "Freelook step size:"
-            }
-			SpinBox 
-			{
-                id: sbStepSize
-
-				Layout.column: 1
-                Layout.row: 2
-
-                value: cameraSettingsHandler.relativeStepSize * 1000
-                from: 0
-				to: 1000
-				stepSize: 100
-				editable: true
-
-				property int decimals: 3
-
-				textFromValue: function(value, locale) 
-				{
-                    return Number(value / 1000).toLocaleString(locale, 'f', sbStepSize.decimals)
-                }
-
-                valueFromText: function(text, locale) 
-				{
-                    return Number.fromLocaleString(locale, text) * 1000
-                }
-				
-				Binding { target: sbStepSize; property: "value"; value: cameraSettingsHandler.relativeStepSize * 1000 }
-                Binding { target: cameraSettingsHandler; property: "relativeStepSize"; value: sbStepSize.value / 1000 }
-            }
-
-			Label 
-			{
-				Layout.column: 0
-                Layout.row: 3
-
-                text: "Orbit zooming speed:"
-            }
-			SpinBox 
-			{
-                id: sbZoomSpeed
-
-				Layout.column: 1
-                Layout.row: 3
-
-                value: cameraSettingsHandler.relativeZoomSpeed * 1000
-                from: 0
-				to: 1000
-				stepSize: 100
-				editable: true
-
-				property int decimals: 3
-
-				textFromValue: function(value, locale) 
-				{
-                    return Number(value / 1000).toLocaleString(locale, 'f', sbZoomSpeed.decimals)
-                }
-
-                valueFromText: function(text, locale) 
-				{
-                    return Number.fromLocaleString(locale, text) * 1000
-                }
-				
-				Binding { target: sbZoomSpeed; property: "value"; value: cameraSettingsHandler.relativeZoomSpeed * 1000 }
-                Binding { target: cameraSettingsHandler; property: "relativeZoomSpeed"; value: sbZoomSpeed.value / 1000 }
-            }
-
-			Label 
-			{
-				Layout.column: 0
-                Layout.row: 4
-
-                text: "Rotation speed:"
-            }
-			SpinBox 
-			{
-                id: sbRotationSpeed
-
-				Layout.column: 1
-                Layout.row: 4
-
-                value: cameraSettingsHandler.rotationSpeed * 1000
-                from: 0
-				to: 1000
-				stepSize: 100
-				editable: true
-
-				property int decimals: 3
-
-				textFromValue: function(value, locale) 
-				{
-                    return Number(value / 1000).toLocaleString(locale, 'f', sbRotationSpeed.decimals)
-                }
-
-                valueFromText: function(text, locale) 
-				{
-                    return Number.fromLocaleString(locale, text) * 1000
-                }
-				
-				Binding { target: sbRotationSpeed; property: "value"; value: cameraSettingsHandler.rotationSpeed * 1000 }
-                Binding { target: cameraSettingsHandler; property: "rotationSpeed"; value: sbRotationSpeed.value / 1000 }
-            }
-
-			Label 
-			{
-				Layout.column: 0
-                Layout.row: 5
-
-                text: "Light count:"
-            }
-			SpinBox 
-			{
-                id: sbLightCount
-
-				Layout.column: 1
-                Layout.row: 5
-
-				property int oldValue: 0;
-
-                value: 0
-                from: 0
-				to: 10000
-				editable: true
-            }
-
-			Label 
-			{
-				Layout.column: 0
-                Layout.row: 6
-
-                text: "Light position range:"
-            }
-			SpinBox 
-			{
-                id: sbLightPosRange
-
-				Layout.column: 1
-                Layout.row: 6
-
-				property int oldValue: 2000;
-
-				value: 2000
-                from: 0
-				to: 100000
-				stepSize: 100
-				editable: true
-
-				property int decimals: 3
-
-				textFromValue: function(value, locale) 
-				{
-                    return Number(value / 1000).toLocaleString(locale, 'f', sbLightPosRange.decimals)
-                }
-
-                valueFromText: function(text, locale) 
-				{
-                    return Number.fromLocaleString(locale, text) * 1000
-                }
-            }
-
-			Label 
-			{
-				Layout.column: 0
-                Layout.row: 7
-
-                text: "Point light radius:"
-            }
-			SpinBox 
-			{
-                id: sbPointLightRadiusMin
-
-				Layout.column: 1
-                Layout.row: 7
-
-				property int oldValue: 100;
-
-				value: 100
-                from: 0
-				to: 100000
-				stepSize: 100
-				editable: true
-
-				property int decimals: 3
-
-				textFromValue: function(value, locale) 
-				{
-                    return Number(value / 1000).toLocaleString(locale, 'f', sbPointLightRadiusMin.decimals)
-                }
-
-                valueFromText: function(text, locale) 
-				{
-                    return Number.fromLocaleString(locale, text) * 1000
-                }
-            }
-			Label 
-			{
-				Layout.column: 2
-                Layout.row: 7
-
-                text: "-"
-            }
-			SpinBox 
-			{
-                id: sbPointLightRadiusMax
-
-				Layout.column: 3
-                Layout.row: 7
-
-				property int oldValue: 500;
-
-				value: 500
-                from: 0
-				to: 100000
-				stepSize: 100
-				editable: true
-
-				property int decimals: 3
-
-				textFromValue: function(value, locale) 
-				{
-                    return Number(value / 1000).toLocaleString(locale, 'f', sbPointLightRadiusMax.decimals)
-                }
-
-                valueFromText: function(text, locale) 
-				{
-                    return Number.fromLocaleString(locale, text) * 1000
-                }
-            }
-
-			Button 
-			{
-			    Layout.column: 1
-                Layout.row: 8
-
-                text: "Generate lights"
-
-				onClicked: 
-				{
-					if (sbPointLightRadiusMin.value > sbPointLightRadiusMax.value)
-					{
-					    sbPointLightRadiusMax.value = sbPointLightRadiusMin.value;
-					}
-
-					sbLightCount.oldValue = sbLightCount.value;
-					sbLightPosRange.oldValue = sbLightPosRange.value;
-					sbPointLightRadiusMin.oldValue = sbPointLightRadiusMin.value;
-					sbPointLightRadiusMax.oldValue = sbPointLightRadiusMax.value;
-
-					var count = sbLightCount.value;
-					var posRange = sbLightPosRange.value / 1000;
-					var radiusMin = sbPointLightRadiusMin.value / 1000;
-					var radiusMax = sbPointLightRadiusMax.value / 1000;
-
-					lightsGenerationHandler.generate(count, posRange, radiusMin, radiusMax);
-				}
+                text: qsTr("Rendering")
             }
         }
+		
+		StackLayout 
+		{
+            width: parent.width
+            currentIndex: bar.currentIndex
+			anchors.top: parent.top;
+			anchors.left: parent.left;
+			anchors.topMargin: bar.height * 2
+			anchors.leftMargin: 10
+
+			GridLayout 
+			{
+            	columns: 2
+				rows: 5
+            	rowSpacing: 10
+            	columnSpacing: 10
+ 
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 0
+
+                	text: "Camera type:"
+            	}
+				RowLayout
+				{
+                	spacing: 10
+
+					ButtonGroup 
+			    	{ 
+			        	id: cameraTypeGroup 
+				    	exclusive: true
+			    	}
+					RadioButton 
+			    	{
+                    	Layout.column: 0
+				    	ButtonGroup.group: cameraTypeGroup
+
+                    	text: "Orbit"
+                    	checked: cameraSettingsHandler.cameraType == CameraSettingsHandler.ORBIT
+                
+			       	 	onClicked: cameraSettingsHandler.cameraType = CameraSettingsHandler.ORBIT;
+                	}
+                	RadioButton 
+			    	{
+			        	Layout.column: 1
+				    	ButtonGroup.group: cameraTypeGroup
+
+                    	text: "Freelook"
+				    	checked: cameraSettingsHandler.cameraType == CameraSettingsHandler.FREELOOK
+
+			       		onClicked: cameraSettingsHandler.cameraType = CameraSettingsHandler.FREELOOK;
+                	}
+				}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 1
+
+                	text: "Field of view:"
+            	}
+				SpinBox 
+				{
+                	id: sbFovy
+
+					Layout.column: 1
+                	Layout.row: 1
+				
+                	value: cameraSettingsHandler.fovy
+                	from: 0
+					to: 180 
+					editable: true
+
+					textFromValue: function(value, locale) 
+					{
+                    	return Number(value).toLocaleString(locale, 'f', 0);
+                	}
+
+                	valueFromText: function(text, locale) 
+					{
+                    	return Number.fromLocaleString(locale, text);
+                	}
+
+					Binding { target: sbFovy; property: "value"; value: cameraSettingsHandler.fovy }
+                	Binding { target: cameraSettingsHandler; property: "fovy"; value: sbFovy.value }
+            	}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 2
+
+               		text: "Freelook step size:"
+            	}
+				SpinBox 
+				{
+                	id: sbStepSize
+
+					Layout.column: 1
+                	Layout.row: 2
+
+                	value: cameraSettingsHandler.relativeStepSize * 1000
+                	from: 0
+					to: 1000
+					stepSize: 100
+					editable: true
+
+					property int decimals: 3
+
+					textFromValue: function(value, locale) 
+					{
+                    	return Number(value / 1000).toLocaleString(locale, 'f', sbStepSize.decimals)
+                	}
+
+                	valueFromText: function(text, locale) 
+					{
+                    	return Number.fromLocaleString(locale, text) * 1000
+                	}
+				
+					Binding { target: sbStepSize; property: "value"; value: cameraSettingsHandler.relativeStepSize * 1000 }
+               		Binding { target: cameraSettingsHandler; property: "relativeStepSize"; value: sbStepSize.value / 1000 }
+            	}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 3
+
+                	text: "Orbit zooming speed:"
+            	}
+				SpinBox 
+				{
+                	id: sbZoomSpeed
+
+					Layout.column: 1
+                	Layout.row: 3
+
+                	value: cameraSettingsHandler.relativeZoomSpeed * 1000
+                	from: 0
+					to: 1000
+					stepSize: 100
+					editable: true
+
+					property int decimals: 3
+
+					textFromValue: function(value, locale) 
+					{
+                    	return Number(value / 1000).toLocaleString(locale, 'f', sbZoomSpeed.decimals)
+                	}
+
+                	valueFromText: function(text, locale) 
+					{
+                    	return Number.fromLocaleString(locale, text) * 1000
+                	}
+				
+					Binding { target: sbZoomSpeed; property: "value"; value: cameraSettingsHandler.relativeZoomSpeed * 1000 }
+                	Binding { target: cameraSettingsHandler; property: "relativeZoomSpeed"; value: sbZoomSpeed.value / 1000 }
+            	}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 4
+
+                	text: "Rotation speed:"
+            	}
+				SpinBox 
+				{
+                	id: sbRotationSpeed
+
+					Layout.column: 1
+                	Layout.row: 4
+
+                	value: cameraSettingsHandler.rotationSpeed * 1000
+                	from: 0
+					to: 1000
+					stepSize: 100
+					editable: true
+
+					property int decimals: 3
+
+					textFromValue: function(value, locale) 
+					{
+                    	return Number(value / 1000).toLocaleString(locale, 'f', sbRotationSpeed.decimals)
+                	}
+
+                	valueFromText: function(text, locale) 
+					{
+                    	return Number.fromLocaleString(locale, text) * 1000
+                	}
+				
+					Binding { target: sbRotationSpeed; property: "value"; value: cameraSettingsHandler.rotationSpeed * 1000 }
+                	Binding { target: cameraSettingsHandler; property: "rotationSpeed"; value: sbRotationSpeed.value / 1000 }
+            	}
+			}
+
+			GridLayout 
+			{
+            	columns: 4
+				rows: 4
+            	rowSpacing: 10
+            	columnSpacing: 10
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 0
+
+                	text: "Light count:"
+            	}
+				SpinBox 
+				{
+                	id: sbLightCount
+
+					Layout.column: 1
+                	Layout.row: 0
+
+					property int oldValue: 0;
+
+                	value: 0
+                	from: 0
+					to: 10000
+					editable: true
+            	}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 1
+
+                	text: "Light position range:"
+            	}
+				SpinBox 
+				{
+                	id: sbLightPosRange
+
+					Layout.column: 1
+               		Layout.row: 1
+
+					property int oldValue: 2000;
+
+					value: 2000
+                	from: 0
+					to: 100000
+					stepSize: 100
+					editable: true
+
+					property int decimals: 3
+
+					textFromValue: function(value, locale) 
+					{
+                    	return Number(value / 1000).toLocaleString(locale, 'f', sbLightPosRange.decimals)
+                	}
+
+                	valueFromText: function(text, locale) 
+					{
+                    	return Number.fromLocaleString(locale, text) * 1000
+                	}
+            	}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 2
+
+                	text: "Point light radius:"
+            	}
+				SpinBox 
+				{
+                	id: sbPointLightRadiusMin
+
+					Layout.column: 1
+                	Layout.row: 2
+
+					property int oldValue: 100;
+
+					value: 100
+                	from: 0
+					to: 100000
+					stepSize: 100
+					editable: true
+
+					property int decimals: 3
+
+					textFromValue: function(value, locale) 
+					{
+                    	return Number(value / 1000).toLocaleString(locale, 'f', sbPointLightRadiusMin.decimals)
+                	}
+
+               		valueFromText: function(text, locale) 
+					{
+                    	return Number.fromLocaleString(locale, text) * 1000
+                	}
+            	}
+				Label 
+				{
+					Layout.column: 2
+                	Layout.row: 2
+
+                	text: "-"
+            	}
+				SpinBox 
+				{
+                	id: sbPointLightRadiusMax
+
+					Layout.column: 3
+                	Layout.row: 2
+
+					property int oldValue: 500;
+
+					value: 500
+                	from: 0
+					to: 100000
+					stepSize: 100
+					editable: true
+
+					property int decimals: 3
+
+					textFromValue: function(value, locale) 
+					{
+                    	return Number(value / 1000).toLocaleString(locale, 'f', sbPointLightRadiusMax.decimals)
+                	}
+
+                	valueFromText: function(text, locale) 
+					{
+                    	return Number.fromLocaleString(locale, text) * 1000
+                	}
+            	}
+
+				Button 
+				{
+			    	Layout.column: 1
+                	Layout.row: 3
+
+                	text: "Generate lights"
+
+					onClicked: 
+					{
+						if (sbPointLightRadiusMin.value > sbPointLightRadiusMax.value)
+						{
+					    	sbPointLightRadiusMax.value = sbPointLightRadiusMin.value;
+						}
+
+						sbLightCount.oldValue = sbLightCount.value;
+						sbLightPosRange.oldValue = sbLightPosRange.value;
+						sbPointLightRadiusMin.oldValue = sbPointLightRadiusMin.value;
+						sbPointLightRadiusMax.oldValue = sbPointLightRadiusMax.value;
+
+						var count = sbLightCount.value;
+						var posRange = sbLightPosRange.value / 1000;
+						var radiusMin = sbPointLightRadiusMin.value / 1000;
+						var radiusMax = sbPointLightRadiusMax.value / 1000;
+
+						lightsGenerationHandler.generate(count, posRange, radiusMin, radiusMax);
+					}
+            	}
+        	}
+
+			GridLayout 
+			{
+            	columns: 2
+				rows: 1
+            	rowSpacing: 10
+            	columnSpacing: 10
+			}
+		}
     }
 }
