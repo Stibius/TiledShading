@@ -65,6 +65,7 @@ set(HEADER_FILES
    src/Scene.h
    src/Camera.h
    src/CameraSettingsHandler.h
+   src/RenderingSettingsHandler.h
    src/MouseEventHandler.h
    src/KeyEventHandler.h
    ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.h
@@ -87,6 +88,7 @@ if(WIN32)
 	   src/Scene.cpp
 	   src/Camera.cpp
 	   src/CameraSettingsHandler.cpp
+	   src/RenderingSettingsHandler.cpp
 	   src/MouseEventHandler.cpp
 	   src/KeyEventHandler.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp
@@ -108,6 +110,7 @@ else()
 	   src/Scene.cpp
 	   src/Camera.cpp
 	   src/CameraSettingsHandler.cpp
+	   src/RenderingSettingsHandler.cpp
 	   src/MouseEventHandler.cpp
 	   src/KeyEventHandler.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp

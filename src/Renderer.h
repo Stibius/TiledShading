@@ -53,8 +53,6 @@ namespace ts
 
 		void setViewportSize(int width, int height);
 
-		void loadShaders(const std::string& vsPath, const std::string& fsPath);
-
 		virtual void setVisualizationTechnique(std::unique_ptr<LightedSceneVT> visualizationTechnique);
 
 		virtual void setScene(const ge::sg::Scene& scene);
@@ -69,7 +67,6 @@ namespace ts
 
 		int m_viewPortWidth;
 		int m_viewPortHeight;
-		std::shared_ptr<ge::gl::Program> m_shaderProgram = nullptr;
 		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
 		std::shared_ptr<ge::sg::Scene> m_scene = nullptr;
 		std::shared_ptr<ge::glsg::GLScene> m_glScene = nullptr;

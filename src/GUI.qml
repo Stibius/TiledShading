@@ -258,7 +258,8 @@ ApplicationWindow
 					Layout.column: 0
                 	Layout.row: 2
 
-               		text: "Freelook step size:"
+               		text: "Step size:"
+					visible: cameraSettingsHandler.cameraType == CameraSettingsHandler.FREELOOK
             	}
 				SpinBox 
 				{
@@ -272,6 +273,7 @@ ApplicationWindow
 					to: 1000
 					stepSize: 100
 					editable: true
+					visible: cameraSettingsHandler.cameraType == CameraSettingsHandler.FREELOOK
 
 					property int decimals: 3
 
@@ -294,7 +296,8 @@ ApplicationWindow
 					Layout.column: 0
                 	Layout.row: 3
 
-                	text: "Orbit zooming speed:"
+                	text: "Zooming speed:"
+					visible: cameraSettingsHandler.cameraType == CameraSettingsHandler.ORBIT
             	}
 				SpinBox 
 				{
@@ -308,6 +311,7 @@ ApplicationWindow
 					to: 1000
 					stepSize: 100
 					editable: true
+					visible: cameraSettingsHandler.cameraType == CameraSettingsHandler.ORBIT
 
 					property int decimals: 3
 
@@ -530,6 +534,28 @@ ApplicationWindow
 				rows: 1
             	rowSpacing: 10
             	columnSpacing: 10
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 0
+
+                	text: "Rendering technique:"
+            	}
+				ComboBox 
+				{
+				    id: cbVisualizationTechnique
+
+				    Layout.column: 1
+                	Layout.row: 0
+
+                    model: ["Forward Shading", "Deferred Shading"]
+
+					currentIndex: renderingSettingsHandler.visualizationTechnique
+
+					Binding { target: cbVisualizationTechnique; property: "currentIndex"; value: renderingSettingsHandler.visualizationTechnique }
+                	Binding { target: renderingSettingsHandler; property: "visualizationTechnique"; value: cbVisualizationTechnique.currentIndex }
+                }
 			}
 		}
     }

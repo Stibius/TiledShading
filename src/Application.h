@@ -9,6 +9,7 @@ namespace ts
 	class MouseEventHandler;
 	class KeyEventHandler;
 	class CameraSettingsHandler;
+	class RenderingSettingsHandler;
 	class Camera;
 	class Scene;
 }
@@ -24,6 +25,7 @@ public:
 	static ts::MouseEventHandler m_mouseEventHandler;
 	static ts::KeyEventHandler m_keyEventHandler;
 	static ts::CameraSettingsHandler m_cameraSettingsHandler;
+	static ts::RenderingSettingsHandler m_renderingSettingsHandler;
 	static std::shared_ptr<ts::Camera> m_camera;
 	static ts::Scene m_scene;
 

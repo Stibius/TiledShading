@@ -8,6 +8,15 @@
 #include <geGL/Texture.h>
 #include <glsg/EnumToGL.h>
 
+void ts::PhongVT::setShaders(const std::string& vsSource, const std::string& fsSource)
+{
+	
+	m_vsSource = vsSource;
+	m_fsSource = fsSource;
+
+	m_needToCompileShaders = true;
+}
+
 void ts::PhongVT::setLights(const std::vector<ge::sg::PointLight>& pointLights)
 {
 	if (!m_shaderProgram)
@@ -52,6 +61,12 @@ void ts::PhongVT::drawSetup()
 
 void ts::PhongVT::draw()
 {
+	if (m_needToCompileShaders)
+	{
+		compileShaders();
+		m_needToCompileShaders = false;
+	}
+
 	if (!m_glContext || !m_shaderProgram || !m_glScene || !m_sceneProcessed)
 	{
 		return;
@@ -106,4 +121,11 @@ void ts::PhongVT::draw()
 		m_glContext->glDrawElements(ge::glsg::translateEnum(mesh->primitive), mesh->count, ge::glsg::translateEnum(mesh->getAttribute(ge::sg::AttributeDescriptor::Semantic::indices)->type), 0);
 		VAO->unbind();
 	}
+}
+
+void ts::PhongVT::compileShaders()
+{
+	std::shared_ptr<ge::gl::Shader> vs(std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, m_vsSource));
+	std::shared_ptr<ge::gl::Shader> fs(std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, m_fsSource));
+	m_shaderProgram = std::make_shared<ge::gl::Program>(vs, fs);
 }

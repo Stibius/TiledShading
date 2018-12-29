@@ -2,10 +2,8 @@
 #include <PointLight.h>
 #include <Camera.h>
 #include <LightedSceneVT.h>
-#include <PhongVT.h>
 
 #include <geGL/geGL.h>
-#include <geCore/Text.h>
 #include <geSG/Scene.h>
 #include <geutil/FreeLookCamera.h>
 #include <geutil/OrbitCamera.h>
@@ -44,13 +42,6 @@ void ts::Renderer::setupGLState()
 	m_glContext->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void ts::Renderer::loadShaders(const std::string& vsPath, const std::string& fsPath)
-{
-	std::shared_ptr<ge::gl::Shader> simple_vs(std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, vsPath));
-	std::shared_ptr<ge::gl::Shader> simple_fs(std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, fsPath));
-	m_shaderProgram = std::make_shared<ge::gl::Program>(simple_vs, simple_fs);
-}
-
 void ts::Renderer::setVisualizationTechnique(std::unique_ptr<LightedSceneVT> visualizationTechnique)
 {
 	m_lightedSceneVT = std::move(visualizationTechnique);
@@ -79,21 +70,10 @@ int ts::Renderer::render()
 
 	setupGLState();
 
-	//if (m_lightedSceneVT == nullptr)
-	//{
-	//return 0;
-	//}
-
-	if (m_shaderProgram == nullptr)
+	if (m_lightedSceneVT == nullptr)
 	{
-		//load shaders
-		std::string shaderDir(APP_RESOURCES"/shaders/");
-		loadShaders(ge::core::loadTextFile(shaderDir + "VS.glsl"), ge::core::loadTextFile(shaderDir + "FS.glsl"));
+	    return 0;
 	}
-
-	std::unique_ptr<PhongVT> phongVT = std::make_unique<PhongVT>();
-	phongVT->m_shaderProgram = m_shaderProgram;
-	setVisualizationTechnique(std::move(phongVT));
 
 	if (m_needToInitVT)
 	{
