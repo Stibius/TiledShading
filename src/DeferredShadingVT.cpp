@@ -156,8 +156,16 @@ void ts::DeferredShadingVT::draw()
 	m_glContext->glEnable(GL_STENCIL_TEST);
 	m_sphereVAO->bind();
 
+	m_lightingPassShaderProgram->set2fv("screenSize", glm::value_ptr(glm::vec2(m_screenWidth, m_screenHeight)));
+
 	for (ge::sg::PointLight pointLight : *m_pointLights)
 	{
+		glm::mat4 modelMatrix = glm::mat4(1.0f);
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(pointLight.position.x, pointLight.position.y, pointLight.position.z));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(pointLight.radius, pointLight.radius, pointLight.radius));
+		m_stencilPassShaderProgram->setMatrix4fv("model", glm::value_ptr(modelMatrix));
+		m_lightingPassShaderProgram->setMatrix4fv("model", glm::value_ptr(modelMatrix));
+
 		m_glContext->glDisable(GL_BLEND);
 		m_glContext->glEnable(GL_DEPTH_TEST);
 		m_glContext->glDisable(GL_CULL_FACE);
@@ -330,11 +338,6 @@ void ts::DeferredShadingVT::stencilPass(const ge::sg::PointLight& pointLight)
 
 	m_stencilPassShaderProgram->use();
 
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(pointLight.position.x, pointLight.position.y, pointLight.position.z));
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(pointLight.radius, pointLight.radius, pointLight.radius));
-	m_stencilPassShaderProgram->setMatrix4fv("model", glm::value_ptr(modelMatrix));
-
 	m_glContext->glDrawElements(GL_TRIANGLES, sizeof(sphereIndices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 }
 
@@ -344,12 +347,6 @@ void ts::DeferredShadingVT::lightingPass(const ge::sg::PointLight& pointLight)
 	m_gBuffer->drawBuffer(GL_COLOR_ATTACHMENT7);
 
 	m_lightingPassShaderProgram->use();
-	m_lightingPassShaderProgram->set2fv("screenSize", glm::value_ptr(glm::vec2(m_screenWidth, m_screenHeight)));
-
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(pointLight.position.x, pointLight.position.y, pointLight.position.z));
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(pointLight.radius, pointLight.radius, pointLight.radius));
-	m_lightingPassShaderProgram->setMatrix4fv("model", glm::value_ptr(modelMatrix));
 
 	m_lightingPassShaderProgram->set4fv("pointLight.position", glm::value_ptr(pointLight.position));
 	m_lightingPassShaderProgram->set4fv("pointLight.color", glm::value_ptr(pointLight.color));
