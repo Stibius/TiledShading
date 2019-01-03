@@ -25,6 +25,10 @@ ApplicationWindow
 			loadSceneAction.enabled = true;
 
 			loadingModelText.text = qsTr("Scene loaded successfully");
+
+			sbLightCount.value = 0;
+			sbLightCount.oldValue = 0;
+			lightsGenerationHandler.generate(0, 0, 0, 0);
         }
     }
 

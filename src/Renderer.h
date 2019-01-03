@@ -33,6 +33,7 @@ namespace ts
 {
 	class Camera;
 	class LightedSceneVT;
+	class ForwardShadingVT;
 
 	class Renderer 
 	{
@@ -57,7 +58,7 @@ namespace ts
 
 		virtual void setScene(const ge::sg::Scene& scene);
 
-		virtual void setLights(const std::vector<ge::sg::PointLight>& pointLights);
+		virtual void setLights(std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights);
 
 		virtual void setCamera(std::shared_ptr<Camera> camera);
 
@@ -71,12 +72,13 @@ namespace ts
 		std::shared_ptr<ge::sg::Scene> m_scene = nullptr;
 		std::shared_ptr<ge::glsg::GLScene> m_glScene = nullptr;
 		std::shared_ptr<Camera> m_camera = nullptr;
-		std::vector<ge::sg::PointLight> m_pointLights;
-		std::unique_ptr<ge::gl::Buffer> m_lightsBuffer = nullptr;
-		std::unique_ptr<LightedSceneVT> m_lightedSceneVT = nullptr;
+		std::shared_ptr<std::vector<ge::sg::PointLight>> m_pointLights = nullptr;
+		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer = nullptr;
+		std::unique_ptr<LightedSceneVT> m_lightVT = nullptr;
+		std::unique_ptr<ForwardShadingVT> m_noLightVT = nullptr;
 		bool m_needToProcessScene = false;
 		bool m_needToSetLightUniforms = true;
-		bool m_needToInitVT = false;
+		bool m_needToInitVT = true;
 
 		virtual void setupGLState();
 	};

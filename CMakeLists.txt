@@ -39,8 +39,12 @@ set(GLSG_FILES
 )
 
 set(SHADER_FILES
-   resources/shaders/VS.glsl 
-   resources/shaders/FS.glsl 
+   resources/shaders/forwardVS.glsl 
+   resources/shaders/forwardFS.glsl 
+   resources/shaders/deferredGeometryVS.glsl 
+   resources/shaders/deferredGeometryFS.glsl 
+   resources/shaders/deferredLightingVS.glsl 
+   resources/shaders/deferredLightingFS.glsl 
 )
 
 set(GUI_FILES
@@ -54,7 +58,8 @@ set(RESOURCE_FILES
 set(HEADER_FILES
    src/Renderer.h
    src/RendererQQuickItem.h
-   src/PhongVT.h
+   src/ForwardShadingVT.h
+   src/DeferredShadingVT.h
    src/LightedSceneVT.h
    src/VisualizationTechnique.h
    src/AABB.h
@@ -68,6 +73,7 @@ set(HEADER_FILES
    src/RenderingSettingsHandler.h
    src/MouseEventHandler.h
    src/KeyEventHandler.h
+   src/Sphere.h
    ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.h
    ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.h
    ${AssimpModelLoader_INCLUDE_DIR}/UnicodeIOStream.h
@@ -79,7 +85,8 @@ if(WIN32)
        src/main.cpp
        src/Renderer.cpp
        src/RendererQQuickItem.cpp
-       src/PhongVT.cpp
+       src/ForwardShadingVT.cpp
+	   src/DeferredShadingVT.cpp
 	   src/LightedSceneVT.cpp
        src/AABB.cpp
        src/SceneLoadingHandler.cpp
@@ -101,7 +108,8 @@ else()
        src/main.cpp
        src/Renderer.cpp
        src/RendererQQuickItem.cpp
-       src/PhongVT.cpp
+       src/ForwardShadingVT.cpp
+	   src/DeferredShadingVT.cpp
 	   src/LightedSceneVT.cpp
        src/AABB.cpp
        src/SceneLoadingHandler.cpp
@@ -138,8 +146,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 # Define a grouping for source files in IDE project generation
 source_group("Header Files" FILES ${HEADER_FILES})
 
-#set(DEFAULT_RESOERCES_PATH "${CMAKE_CURRENT_LIST_DIR}/resources")
-#set(${APP_NAME}_RESOURCES "${DEFAULT_RESOERCES_PATH}" CACHE PATH "Relative or absolute path to Application resources.")
+set(DEFAULT_RESOERCES_PATH "${CMAKE_CURRENT_LIST_DIR}/resources")
+set(${APP_NAME}_RESOURCES "${DEFAULT_RESOERCES_PATH}" CACHE PATH "Relative or absolute path to Application resources.")
 
 add_executable(${APP_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${GUI_FILES} ${RESOURCE_FILES} ${GLSG_FILES} ${SHADER_FILES})
 

@@ -20,5 +20,6 @@ namespace ts
 		virtual void drawSetup() = 0;
 
 		virtual void draw() = 0;
+
 	};
 }

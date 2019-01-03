@@ -21,7 +21,7 @@ void ts::LightsGenerationHandler::init(const Scene* scene, Renderer* renderer)
 void ts::LightsGenerationHandler::generate(int count, float posRange, float radiusMin, float radiusMax)
 {
 	const AABB& boundingBox = m_scene->getBoundingBox();
-	std::vector<ge::sg::PointLight> pointLights;
+	std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights = std::make_shared<std::vector<ge::sg::PointLight>>();
 	glm::vec3 center = boundingBox.getCenter();
 
 	for (int i = 0; i < count; i++)
@@ -44,7 +44,7 @@ void ts::LightsGenerationHandler::generate(int count, float posRange, float radi
 		float maxRadius = radiusMax * boundingBox.getLongestSide();
 		light.radius = minRadius + ((static_cast<float>(rand()) / RAND_MAX) * (maxRadius - minRadius));
 
-		pointLights.push_back(light);
+		pointLights->push_back(light);
 	}
 
 	m_renderer->setLights(pointLights);

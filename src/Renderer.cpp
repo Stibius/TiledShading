@@ -1,10 +1,12 @@
 ﻿#include <Renderer.h>
 #include <PointLight.h>
 #include <Camera.h>
+#include <ForwardShadingVT.h>
 #include <LightedSceneVT.h>
 
 #include <geGL/geGL.h>
 #include <geSG/Scene.h>
+#include <geCore/Text.h>
 #include <geutil/FreeLookCamera.h>
 #include <geutil/OrbitCamera.h>
 #include <geutil/PerspectiveCamera.h>
@@ -12,8 +14,15 @@
 
 #include <chrono>
 
+#include <QDebug>
+
 ts::Renderer::Renderer()
 {
+	m_noLightVT = std::make_unique<ForwardShadingVT>();
+	std::string shaderDir(APP_RESOURCES"/shaders/");
+	std::string vsSource = ge::core::loadTextFile(shaderDir + "forwardVS.glsl");
+	std::string fsSource = ge::core::loadTextFile(shaderDir + "forwardFS.glsl");
+	m_noLightVT->setShaders(vsSource, fsSource);
 }
 
 void ts::Renderer::setViewportSize(int width, int height)
@@ -22,6 +31,8 @@ void ts::Renderer::setViewportSize(int width, int height)
 	m_viewPortHeight = height;
 	m_camera->m_perspective->setAspect(static_cast<float>(m_viewPortWidth) / static_cast<float>(m_viewPortHeight));
 	m_camera->m_perspective->setAspect(static_cast<float>(m_viewPortWidth) / static_cast<float>(m_viewPortHeight));
+	m_lightVT->setViewportSize(width, height);
+	m_noLightVT->setViewportSize(width, height);
 }
 
 void ts::Renderer::setScene(const ge::sg::Scene& scene)
@@ -38,17 +49,17 @@ void ts::Renderer::setupGLState()
 	}
 
 	m_glContext->glViewport(0, 0, m_viewPortWidth, m_viewPortHeight);
-	m_glContext->glClearColor(0.4, 0.4, 0.4, 1.0);
+	m_glContext->glClearColor(0.0, 0.0, 0.0, 1.0);
 	m_glContext->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void ts::Renderer::setVisualizationTechnique(std::unique_ptr<LightedSceneVT> visualizationTechnique)
 {
-	m_lightedSceneVT = std::move(visualizationTechnique);
+	m_lightVT = std::move(visualizationTechnique);
 	m_needToInitVT = true;
 }
 
-void ts::Renderer::setLights(const std::vector<ge::sg::PointLight>& pointLights)
+void ts::Renderer::setLights(std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights)
 {
 	m_pointLights = pointLights;
 	m_needToSetLightUniforms = true;
@@ -70,47 +81,59 @@ int ts::Renderer::render()
 
 	setupGLState();
 
-	if (m_lightedSceneVT == nullptr)
+	LightedSceneVT* currentVT;
+	if (!m_pointLights || m_pointLights->empty())
 	{
-	    return 0;
+		currentVT = m_noLightVT.get();
+	}
+	else
+	{
+		currentVT = m_lightVT.get();
 	}
 
 	if (m_needToInitVT)
 	{
-		m_lightedSceneVT->m_glContext = m_glContext;
-		if (!m_needToProcessScene) m_lightedSceneVT->setScene(m_glScene);
-		if (!m_needToSetLightUniforms) m_lightedSceneVT->setLights(m_pointLights);
+		m_lightVT->m_glContext = m_glContext;
+		if (!m_needToProcessScene) m_lightVT->setScene(m_glScene);
+		if (!m_needToSetLightUniforms) m_lightVT->setLights(m_pointLights);
+
+		m_noLightVT->m_glContext = m_glContext;
+
 		m_needToInitVT = false;
 	}
 
 	if (m_needToProcessScene)
 	{
 		m_glScene = ge::glsg::GLSceneProcessor::processScene(m_scene, m_glContext);
-		m_lightedSceneVT->setScene(m_glScene);
+		m_lightVT->setScene(m_glScene);
+		m_noLightVT->setScene(m_glScene);
 		m_needToProcessScene = false;
 	}
 
 	if (m_needToSetLightUniforms)
 	{
-		m_lightedSceneVT->setLights(m_pointLights);
+		m_lightVT->setLights(m_pointLights);
 		m_needToSetLightUniforms = false;
 	}
 
-	m_lightedSceneVT->setProjectionMatrix(m_camera->m_perspective->getProjection());
+	currentVT->setProjectionMatrix(m_camera->m_perspective->getProjection());
 	if (m_camera->m_orbit)
 	{
-		m_lightedSceneVT->setViewMatrix(m_camera->m_orbit->getView());
+		currentVT->setViewMatrix(m_camera->m_orbit->getView());
 	}
 	else if (m_camera->m_freeLook)
 	{
-		m_lightedSceneVT->setViewMatrix(m_camera->m_freeLook->getView());
+		currentVT->setViewMatrix(m_camera->m_freeLook->getView());
 	}
+	currentVT->setModelMatrix(glm::mat4(1.0));
+
+	currentVT->drawSetup();
 
 	m_glContext->glFinish();
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-	m_lightedSceneVT->draw();
+	currentVT->draw();
 
 	m_glContext->glFinish();
 
