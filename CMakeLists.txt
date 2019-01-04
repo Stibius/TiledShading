@@ -74,6 +74,7 @@ set(HEADER_FILES
    src/MouseEventHandler.h
    src/KeyEventHandler.h
    src/Sphere.h
+   src/GBuffer.h
    ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.h
    ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.h
    ${AssimpModelLoader_INCLUDE_DIR}/UnicodeIOStream.h
@@ -98,6 +99,7 @@ if(WIN32)
 	   src/RenderingSettingsHandler.cpp
 	   src/MouseEventHandler.cpp
 	   src/KeyEventHandler.cpp
+	   src/GBuffer.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/UnicodeIOStream.cpp
@@ -121,6 +123,7 @@ else()
 	   src/RenderingSettingsHandler.cpp
 	   src/MouseEventHandler.cpp
 	   src/KeyEventHandler.cpp
+	   src/GBuffer.cpp
        ${QtImageLoader_INCLUDE_DIR}/QtImageLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/AssimpModelLoader.cpp
        ${AssimpModelLoader_INCLUDE_DIR}/UnicodeIOStream.cpp

@@ -48,6 +48,16 @@ namespace ts
 
 		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
 
+		LightedSceneVT() = default;
+
+		LightedSceneVT(const LightedSceneVT& vt) = delete;
+
+		LightedSceneVT(LightedSceneVT&& vt) = default;
+
+		LightedSceneVT& operator=(const LightedSceneVT& vt) = delete;
+
+		LightedSceneVT& operator=(LightedSceneVT&& vt) = default;
+
 		virtual ~LightedSceneVT() = default;
 
 		virtual void setViewportSize(int width, int height) = 0;

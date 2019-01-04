@@ -2,7 +2,7 @@
 
 namespace ts
 {
-	const float sphereVertices[] = 
+	static const float sphereVertices[] = 
 	{
 		0.000000f, 1.000000f, -0.000000f,
 		0.191341f, -0.980785f, -0.038060f,
@@ -488,7 +488,7 @@ namespace ts
 		0.195090f, -0.980785f, 0.000000f
 	};
 
-	const unsigned int sphereIndices[] = 
+	static const unsigned int sphereIndices[] = 
 	{  
 		31, 1, 481,
 		481, 1, 2,

@@ -1,6 +1,7 @@
 #include <DeferredShadingVT.h>
 #include <PointLight.h>
 #include <Sphere.h>
+#include <GBuffer.h>
 
 #include <glsg/GLScene.h>
 #include <geGL/VertexArray.h>
@@ -10,8 +11,6 @@
 #include <geGL/Renderbuffer.h>
 #include <geGL/Texture.h>
 #include <glsg/EnumToGL.h>
-
-#include <QDebug>
 
 const std::string ts::DeferredShadingVT::m_stencilPassVSSource = R".(
 #version 450
@@ -43,7 +42,7 @@ void ts::DeferredShadingVT::setViewportSize(int width, int height)
 
 	if (m_gBuffer)
 	{
-		createGBuffer();
+		m_gBuffer->init(width, height);
 	}
 }
 
@@ -111,7 +110,9 @@ void ts::DeferredShadingVT::drawSetup()
 
 	if (!m_gBuffer)
 	{
-		createGBuffer();
+		m_gBuffer = std::make_unique<GBuffer>();
+		m_gBuffer->m_glContext = m_glContext;
+		m_gBuffer->init(m_screenWidth, m_screenHeight);
 	}
 
 	if (!m_sphereVAO)
@@ -133,17 +134,16 @@ void ts::DeferredShadingVT::draw()
 		return;
 	}
 
-	m_gBuffer->bind(GL_DRAW_FRAMEBUFFER);
 	m_gBuffer->drawBuffers(
 		8,
-		GL_COLOR_ATTACHMENT0,
-		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3,
-		GL_COLOR_ATTACHMENT4,
-		GL_COLOR_ATTACHMENT5,
-		GL_COLOR_ATTACHMENT6,
-		GL_COLOR_ATTACHMENT7);
+		GBuffer::POSITION_TEXTURE,
+		GBuffer::NORMAL_TEXTURE,
+		GBuffer::AMBIENT_TEXTURE,
+		GBuffer::DIFFUSE_TEXTURE,
+		GBuffer::SPECULAR_TEXTURE,
+		GBuffer::EMISSIVE_TEXTURE,
+		GBuffer::SHININESS_TEXTURE,
+		GBuffer::OUTPUT_RENDERBUFFER);
 	m_glContext->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_glContext->glDisable(GL_BLEND);
@@ -191,97 +191,22 @@ void ts::DeferredShadingVT::draw()
 
 	m_glContext->glDisable(GL_STENCIL_TEST);
 
-	m_gBuffer->bind(GL_READ_FRAMEBUFFER);
-	m_glContext->glReadBuffer(GL_COLOR_ATTACHMENT7);
+	m_gBuffer->readBuffer(GBuffer::OUTPUT_RENDERBUFFER);
 	m_glContext->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	m_glContext->glBlitFramebuffer(0, 0, m_screenWidth, m_screenHeight, 0, 0, m_screenWidth, m_screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
-void ts::DeferredShadingVT::createGBuffer()
-{
-	m_gBuffer = std::make_unique<ge::gl::Framebuffer>();
-	m_gBuffer->bind(GL_FRAMEBUFFER);
-
-	//position texture
-	m_gTexPosition = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGB16F, 0, m_screenWidth, m_screenHeight, 0);
-	m_gTexPosition->setData2D(nullptr, GL_RGB, GL_FLOAT, 0, GL_TEXTURE_2D);
-	m_gTexPosition->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_gTexPosition->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_gTexPosition->bind(4);
-	m_gBuffer->attachTexture(GL_COLOR_ATTACHMENT0, m_gTexPosition);
-
-	//normal texture
-	m_gTexNormal = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGB16F, 0, m_screenWidth, m_screenHeight, 0);
-	m_gTexNormal->setData2D(nullptr, GL_RGB, GL_FLOAT, 0, GL_TEXTURE_2D);
-	m_gTexNormal->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_gTexNormal->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_gTexNormal->bind(5);
-	m_gBuffer->attachTexture(GL_COLOR_ATTACHMENT1, m_gTexNormal);
-
-	//ambient texture
-	m_gTexAmbient = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGB, 0, m_screenWidth, m_screenHeight, 0);
-	m_gTexAmbient->setData2D(nullptr, GL_RGB, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D);
-	m_gTexAmbient->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_gTexAmbient->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_gTexAmbient->bind(6);
-	m_gBuffer->attachTexture(GL_COLOR_ATTACHMENT2, m_gTexAmbient);
-
-	//diffuse texture
-	m_gTexDiffuse = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGB, 0, m_screenWidth, m_screenHeight, 0);
-	m_gTexDiffuse->setData2D(nullptr, GL_RGB, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D);
-	m_gTexDiffuse->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_gTexDiffuse->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_gTexDiffuse->bind(7);
-	m_gBuffer->attachTexture(GL_COLOR_ATTACHMENT3, m_gTexDiffuse);
-
-	//specular texture
-	m_gTexSpecular = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGB, 0, m_screenWidth, m_screenHeight, 0);
-	m_gTexSpecular->setData2D(nullptr, GL_RGB, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D);
-	m_gTexSpecular->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_gTexSpecular->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_gTexSpecular->bind(8);
-	m_gBuffer->attachTexture(GL_COLOR_ATTACHMENT4, m_gTexSpecular);
-
-	//emissive texture
-	m_gTexEmissive = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGB, 0, m_screenWidth, m_screenHeight, 0);
-	m_gTexEmissive->setData2D(nullptr, GL_RGB, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D);
-	m_gTexEmissive->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_gTexEmissive->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_gTexEmissive->bind(9);
-	m_gBuffer->attachTexture(GL_COLOR_ATTACHMENT5, m_gTexEmissive);
-
-	//shininess texture
-	m_gTexShininess = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_R16F, 0, m_screenWidth, m_screenHeight, 0);
-	m_gTexShininess->setData2D(nullptr, GL_RED, GL_UNSIGNED_BYTE, 0, GL_TEXTURE_2D);
-	m_gTexShininess->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_gTexShininess->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_gTexShininess->bind(10);
-	m_gBuffer->attachTexture(GL_COLOR_ATTACHMENT6, m_gTexShininess);
-
-	std::shared_ptr<ge::gl::Renderbuffer> finalRenderBuffer = std::make_shared<ge::gl::Renderbuffer>();
-	if (m_glContext == nullptr) qDebug() << "done!!!";
-	m_glContext->glNamedRenderbufferStorageMultisample(finalRenderBuffer->getId(), 0, GL_RGB16F, m_screenWidth, m_screenHeight);
-	m_gBuffer->attachRenderbuffer(GL_COLOR_ATTACHMENT7, finalRenderBuffer);
-	
-	std::shared_ptr<ge::gl::Renderbuffer> depthRenderBuffer = std::make_shared<ge::gl::Renderbuffer>();
-	m_glContext->glNamedRenderbufferStorageMultisample(depthRenderBuffer->getId(), 0, GL_DEPTH_STENCIL, m_screenWidth, m_screenHeight);
-	m_gBuffer->attachRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, depthRenderBuffer);
-
-	m_gBuffer->unbind(GL_FRAMEBUFFER);
-}
-
 void ts::DeferredShadingVT::geometryPass()
 {
-	m_gBuffer->bind(GL_DRAW_FRAMEBUFFER);
 	m_gBuffer->drawBuffers(
 		7,
-		GL_COLOR_ATTACHMENT0,
-		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3,
-		GL_COLOR_ATTACHMENT4,
-		GL_COLOR_ATTACHMENT5,
-		GL_COLOR_ATTACHMENT6);
+		GBuffer::POSITION_TEXTURE,
+		GBuffer::NORMAL_TEXTURE,
+		GBuffer::AMBIENT_TEXTURE,
+		GBuffer::DIFFUSE_TEXTURE,
+		GBuffer::SPECULAR_TEXTURE,
+		GBuffer::EMISSIVE_TEXTURE,
+		GBuffer::SHININESS_TEXTURE);
 
 	m_geometryPassShaderProgram->use();
 
@@ -332,7 +257,7 @@ void ts::DeferredShadingVT::geometryPass()
 
 void ts::DeferredShadingVT::stencilPass(const ge::sg::PointLight& pointLight)
 {
-	m_gBuffer->drawBuffers(GL_NONE);
+	m_gBuffer->drawBuffers(0);
 
 	m_glContext->glClear(GL_STENCIL_BUFFER_BIT);
 
@@ -343,8 +268,15 @@ void ts::DeferredShadingVT::stencilPass(const ge::sg::PointLight& pointLight)
 
 void ts::DeferredShadingVT::lightingPass(const ge::sg::PointLight& pointLight)
 {
-	m_gBuffer->bind(GL_DRAW_FRAMEBUFFER);
-	m_gBuffer->drawBuffer(GL_COLOR_ATTACHMENT7);
+	m_gBuffer->drawBuffers(1, GBuffer::OUTPUT_RENDERBUFFER);
+
+	m_gBuffer->bindTexture(GBuffer::Buffers::POSITION_TEXTURE, 4);
+	m_gBuffer->bindTexture(GBuffer::Buffers::NORMAL_TEXTURE, 5);
+	m_gBuffer->bindTexture(GBuffer::Buffers::AMBIENT_TEXTURE, 6);
+	m_gBuffer->bindTexture(GBuffer::Buffers::DIFFUSE_TEXTURE, 7);
+	m_gBuffer->bindTexture(GBuffer::Buffers::SPECULAR_TEXTURE, 8);
+	m_gBuffer->bindTexture(GBuffer::Buffers::EMISSIVE_TEXTURE, 9);
+	m_gBuffer->bindTexture(GBuffer::Buffers::SHININESS_TEXTURE, 10);
 
 	m_lightingPassShaderProgram->use();
 

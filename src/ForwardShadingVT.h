@@ -35,6 +35,16 @@ namespace ts
 	{
 	public:
 
+		ForwardShadingVT() = default;
+
+		ForwardShadingVT(const ForwardShadingVT& vt) = delete;
+
+		ForwardShadingVT(ForwardShadingVT&& vt) = default;
+
+		ForwardShadingVT& operator=(const ForwardShadingVT& vt) = delete;
+
+		ForwardShadingVT& operator=(ForwardShadingVT&& vt) = default;
+
 		virtual ~ForwardShadingVT() = default;
 
 		void setViewportSize(int width, int height) override;

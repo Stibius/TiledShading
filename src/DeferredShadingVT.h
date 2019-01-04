@@ -1,22 +1,16 @@
 #pragma once
 
 #include <LightedSceneVT.h>
+#include <GBuffer.h>
 
 #include <memory>
 #include <vector>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace ge
 {
 	namespace gl
 	{
 		class Program;
-		class Buffer;
-		class Framebuffer;
-		class Texture;
 	}
 
 	namespace sg
@@ -27,6 +21,8 @@ namespace ge
 
 namespace ts
 {
+	class GBuffer;
+
 	/**
 	* This VT draws a ge::glsg::GLScene with lights and transformations using deferred Phong shading.
 	* It supports materials with ambient, diffuse, specular and emissive components and shininess.
@@ -36,6 +32,16 @@ namespace ts
 	class DeferredShadingVT : public LightedSceneVT
 	{
 	public:
+
+		DeferredShadingVT() = default;
+
+		DeferredShadingVT(const DeferredShadingVT& vt) = delete;
+
+		DeferredShadingVT(DeferredShadingVT&& vt) = default;
+
+		DeferredShadingVT& operator=(const DeferredShadingVT& vt) = delete;
+
+		DeferredShadingVT& operator=(DeferredShadingVT&& vt) = default;
 
 		virtual ~DeferredShadingVT() = default;
 
@@ -57,14 +63,8 @@ namespace ts
 		int m_screenHeight;
 
 		std::unique_ptr<ge::gl::VertexArray> m_sphereVAO = nullptr;
-		std::unique_ptr<ge::gl::Framebuffer> m_gBuffer = nullptr;
-		std::shared_ptr<ge::gl::Texture> m_gTexPosition = nullptr;
-		std::shared_ptr<ge::gl::Texture> m_gTexNormal = nullptr;
-		std::shared_ptr<ge::gl::Texture> m_gTexAmbient = nullptr;
-		std::shared_ptr<ge::gl::Texture> m_gTexDiffuse = nullptr;
-		std::shared_ptr<ge::gl::Texture> m_gTexSpecular = nullptr;
-		std::shared_ptr<ge::gl::Texture> m_gTexEmissive = nullptr;
-		std::shared_ptr<ge::gl::Texture> m_gTexShininess = nullptr;
+
+		std::unique_ptr<GBuffer> m_gBuffer = nullptr;
 
 		std::unique_ptr<ge::gl::Program> m_geometryPassShaderProgram = nullptr;
 		std::unique_ptr<ge::gl::Program> m_stencilPassShaderProgram = nullptr;
@@ -77,8 +77,6 @@ namespace ts
 		std::string m_lightingPassFSSource;
 
 		bool m_needToCompileShaders = false;
-
-		virtual void createGBuffer();
 
 		virtual void geometryPass();
 
