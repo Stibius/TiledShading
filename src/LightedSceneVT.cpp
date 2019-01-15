@@ -91,17 +91,17 @@ void ts::LightedSceneVT::setLights(std::shared_ptr<std::vector<ge::sg::PointLigh
 void ts::LightedSceneVT::setProjectionMatrix(glm::mat4 projectionMatrix)
 {
 	m_projectionMatrix = projectionMatrix;
-	m_needToSetupTransforms = true;
+	m_needToSetupUniforms = true;
 }
 
 void ts::LightedSceneVT::setViewMatrix(glm::mat4 viewMatrix)
 {
 	m_viewMatrix = viewMatrix;
-	m_needToSetupTransforms = true;
+	m_needToSetupUniforms = true;
 }
 
 void ts::LightedSceneVT::setModelMatrix(glm::mat4 modelMatrix)
 {
 	m_modelMatrix = modelMatrix;
-	m_needToSetupTransforms = true;
+	m_needToSetupUniforms = true;
 }

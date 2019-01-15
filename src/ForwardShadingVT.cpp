@@ -40,26 +40,26 @@ void ts::ForwardShadingVT::drawSetup()
 	{
 		if (m_pointLights && m_pointLights->size() != 0)
 		{
-			m_shaderProgram->set1i("lightCount", m_pointLights->size());
+			m_shaderProgram->set1ui("lightCount", m_pointLights->size());
 			m_lightsShaderStorageBuffer = std::make_unique<ge::gl::Buffer>(m_pointLights->size() * sizeof(ge::sg::PointLight), m_pointLights->data(), GL_DYNAMIC_DRAW);
 			m_lightsShaderStorageBuffer->bindBase(GL_SHADER_STORAGE_BUFFER, 0);
 		}
 		else
 		{
-			m_shaderProgram->set1i("lightCount", 0);
+			m_shaderProgram->set1ui("lightCount", 0);
 		}
 
 		m_needToSetupLights = false;
 	}
 
-	if (m_needToSetupTransforms)
+	if (m_needToSetupUniforms)
 	{
-		m_shaderProgram->setMatrix4fv("projection", glm::value_ptr(m_projectionMatrix));
-		m_shaderProgram->setMatrix4fv("view", glm::value_ptr(m_viewMatrix));
-		m_shaderProgram->set3fv("viewPos", glm::value_ptr(glm::inverse(m_viewMatrix) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		m_shaderProgram->setMatrix4fv("model", glm::value_ptr(m_modelMatrix));
+		m_shaderProgram->setMatrix4fv("projectionMatrix", glm::value_ptr(m_projectionMatrix));
+		m_shaderProgram->setMatrix4fv("viewMatrix", glm::value_ptr(m_viewMatrix));
+		m_shaderProgram->setMatrix4fv("modelMatrix", glm::value_ptr(m_modelMatrix));
+		m_shaderProgram->set3fv("cameraPos", glm::value_ptr(glm::inverse(m_viewMatrix) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 
-		m_needToSetupTransforms = false;
+		m_needToSetupUniforms = false;
 	}
 }
 

@@ -89,7 +89,7 @@ namespace ts
 		
 		bool m_sceneProcessed = false;
 		bool m_needToSetupLights = true;
-		bool m_needToSetupTransforms = true;
+		bool m_needToSetupUniforms = true;
 
 		virtual void processScene();
 	};

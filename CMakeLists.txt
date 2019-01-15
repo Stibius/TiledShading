@@ -39,12 +39,15 @@ set(GLSG_FILES
 )
 
 set(SHADER_FILES
-   resources/shaders/forwardVS.glsl 
-   resources/shaders/forwardFS.glsl 
-   resources/shaders/deferredGeometryVS.glsl 
-   resources/shaders/deferredGeometryFS.glsl 
-   resources/shaders/deferredLightingVS.glsl 
-   resources/shaders/deferredLightingFS.glsl 
+   src/shaders/forwardVS.glsl 
+   src/shaders/forwardFS.glsl 
+   src/shaders/deferredGeometryVS.glsl 
+   src/shaders/deferredGeometryFS.glsl 
+   src/shaders/deferredLightingVS.glsl 
+   src/shaders/deferredLightingFS.glsl 
+   src/shaders/tiledDeferredRenderVS.glsl 
+   src/shaders/tiledDeferredRenderFS.glsl
+   src/shaders/tiledDeferredLightingCS.glsl
 )
 
 set(GUI_FILES
@@ -60,6 +63,7 @@ set(HEADER_FILES
    src/RendererQQuickItem.h
    src/ForwardShadingVT.h
    src/DeferredShadingVT.h
+   src/TiledDeferredShadingVT.h
    src/LightedSceneVT.h
    src/VisualizationTechnique.h
    src/AABB.h
@@ -88,6 +92,7 @@ if(WIN32)
        src/RendererQQuickItem.cpp
        src/ForwardShadingVT.cpp
 	   src/DeferredShadingVT.cpp
+	   src/TiledDeferredShadingVT.cpp
 	   src/LightedSceneVT.cpp
        src/AABB.cpp
        src/SceneLoadingHandler.cpp
@@ -112,6 +117,7 @@ else()
        src/RendererQQuickItem.cpp
        src/ForwardShadingVT.cpp
 	   src/DeferredShadingVT.cpp
+	   src/TiledDeferredShadingVT.cpp
 	   src/LightedSceneVT.cpp
        src/AABB.cpp
        src/SceneLoadingHandler.cpp

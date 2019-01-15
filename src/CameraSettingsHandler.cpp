@@ -7,6 +7,8 @@
 #include <geUtil/FreeLookCamera.h>
 #include <geUtil/PerspectiveCamera.h>
 
+#include <QDebug>
+
 ts::CameraSettingsHandler::CameraSettingsHandler(Camera* camera, const Scene* scene)
 	: m_camera(camera)
 	, m_scene(scene)

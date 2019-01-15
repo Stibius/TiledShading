@@ -28,6 +28,20 @@ ts::RenderingSettingsHandler Application::m_renderingSettingsHandler;
 std::shared_ptr<ts::Camera> Application::m_camera = std::make_shared<ts::Camera>();
 ts::Scene Application::m_scene;
 
+std::string Application::loadResourceFile(const std::string& path)
+{
+	QString content;
+	QFile inFile(QString::fromStdString(path));
+	if (inFile.open(QFile::ReadOnly | QFile::Text))
+	{
+		QTextStream inStream(&inFile);
+		content = inStream.readAll();
+		inFile.close();
+	}
+
+	return content.toStdString();
+}
+
 bool Application::init(int& argc, char* argv[], int& exitCode)
 {
 	// protect against multiple initializations
@@ -82,7 +96,7 @@ int Application::run()
 	m_lightsGenerationHandler.init(&m_scene, renderer);
 	m_sceneLoadingHandler.init(&m_scene, renderer);
 	m_renderingSettingsHandler.init(renderer);
-	
+
 	QObject::connect(&m_renderingSettingsHandler, &ts::RenderingSettingsHandler::render, rendererItem, &ts::RendererQQuickItem::render);
 	QObject::connect(&m_cameraSettingsHandler, &ts::CameraSettingsHandler::render, rendererItem, &ts::RendererQQuickItem::render);
 	QObject::connect(&m_keyEventHandler, &ts::KeyEventHandler::render, rendererItem, &ts::RendererQQuickItem::render);

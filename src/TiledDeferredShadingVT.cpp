@@ -1,41 +1,16 @@
-#include <DeferredShadingVT.h>
-#include <PointLight.h>
+#include <math.h>
+
+#include <TiledDeferredShadingVT.h>
 #include <Sphere.h>
-#include <GBuffer.h>
+#include <PointLight.h> 
 
 #include <glsg/GLScene.h>
-#include <geGL/VertexArray.h>
-#include <geGL/Program.h>
-#include <geGL/Buffer.h>
-#include <geGL/Framebuffer.h>
-#include <geGL/Renderbuffer.h>
-#include <geGL/Texture.h>
 #include <glsg/EnumToGL.h>
 
-const std::string ts::DeferredShadingVT::m_stencilPassVSSource = R".(
-#version 450
 
-layout(location = 0) in vec3 position;
+#include <QDebug>
 
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 modelMatrix;
-
-void main()
-{ 
-   gl_Position = projectionMatrix * viewMatrix * modelMatrix* vec4(position, 1.0);
-}
-).";
-
-const std::string ts::DeferredShadingVT::m_stencilPassFSSource = R".(
-#version 450
-
-void main()
-{
-}
-).";
-
-void ts::DeferredShadingVT::setViewportSize(int width, int height)
+void ts::TiledDeferredShadingVT::setViewportSize(int width, int height)
 {
 	m_screenWidth = width;
 	m_screenHeight = height;
@@ -44,23 +19,71 @@ void ts::DeferredShadingVT::setViewportSize(int width, int height)
 	{
 		m_gBuffer->init(width, height);
 	}
+
+	if (m_outputTexture)
+	{
+		int textureWidth = m_screenWidth;
+		int textureHeight = m_screenHeight;
+
+		m_outputTexture = std::make_unique<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA32F, 0, textureWidth, textureHeight, 0);
+		m_outputTexture->setData2D(nullptr, GL_RGBA, GL_FLOAT, 0, GL_TEXTURE_2D);
+		m_outputTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		m_outputTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
+
+	m_needToSetupUniforms = true;
 }
 
-void ts::DeferredShadingVT::setShaders(
-	const std::string& geometryPassVSSource, 
-	const std::string& geometryPassFSSource,
-	const std::string& lightingPassVSSource,
-	const std::string& lightingPassFSSource)
+void ts::TiledDeferredShadingVT::setProjectionMatrix(glm::mat4 projectionMatrix)
 {
-	m_geometryPassVSSource = geometryPassVSSource;
-	m_geometryPassFSSource = geometryPassFSSource;
-	m_lightingPassVSSource = lightingPassVSSource;
-	m_lightingPassFSSource = lightingPassFSSource;
+	m_projectionMatrix = projectionMatrix;
+
+	m_near = (2.0f * projectionMatrix[3][2]) / (2.0f * projectionMatrix[2][2] - 2.0f);
+	m_far = (m_near * (projectionMatrix[2][2] - 1.0f)) / (projectionMatrix[2][2] + 1.0f);
+
+	m_needToSetupUniforms = true;
+}
+
+void ts::TiledDeferredShadingVT::setTileSize(int size)
+{
+	size_t pos1 = m_lightingPassCSSource.find("local_size_x");
+	if (pos1 == std::string::npos) return;
+	size_t pos2 = m_lightingPassCSSource.find(")", pos1);
+	if (pos2 == std::string::npos) return;
+	m_lightingPassCSSource.replace(pos1, pos2 - pos1, "local_size_x = " + std::to_string(size) + ", local_size_y = " + std::to_string(size));
+
+	m_tileSize = size;
+	m_needToCompileShaders = true;
+}
+
+void ts::TiledDeferredShadingVT::setMaxLightsPerTile(int maxLightsPerTile)
+{
+	size_t pos1 = m_lightingPassCSSource.find("MAX_LIGHTS_PER_TILE");
+	if (pos1 == std::string::npos) return;
+	size_t pos2 = m_lightingPassCSSource.find(";", pos1);
+	if (pos2 == std::string::npos) return;
+	m_lightingPassCSSource.replace(pos1, pos2 - pos1, "MAX_LIGHTS_PER_TILE = " + std::to_string(maxLightsPerTile));
 
 	m_needToCompileShaders = true;
 }
 
-void ts::DeferredShadingVT::drawSetup()
+void ts::TiledDeferredShadingVT::setShaders(
+	const std::string& geometryPassVSSource, 
+	const std::string& geometryPassFSSource, 
+	const std::string& lightingPassCSSource,
+	const std::string& renderPassVSSource,
+	const std::string& renderPassFSSource)
+{
+	m_geometryPassVSSource = geometryPassVSSource;
+	m_geometryPassFSSource = geometryPassFSSource;
+	m_lightingPassCSSource = lightingPassCSSource;
+	m_renderPassVSSource = renderPassVSSource;
+	m_renderPassFSSource = renderPassFSSource;
+
+	m_needToCompileShaders = true;
+}
+
+void ts::TiledDeferredShadingVT::drawSetup()
 {
 	if (m_needToCompileShaders)
 	{
@@ -73,13 +96,12 @@ void ts::DeferredShadingVT::drawSetup()
 		m_geometryPassShaderProgram->set1i("material.specularTex", 2);
 		m_geometryPassShaderProgram->set1i("material.emissiveTex", 3);
 
-		std::shared_ptr<ge::gl::Shader> stencilVS(std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, m_stencilPassVSSource));
-		std::shared_ptr<ge::gl::Shader> stencilFS(std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, m_stencilPassFSSource));
-		m_stencilPassShaderProgram = std::make_unique<ge::gl::Program>(stencilVS, stencilFS);
+		std::shared_ptr<ge::gl::Shader> lightingCS(std::make_shared<ge::gl::Shader>(GL_COMPUTE_SHADER, m_lightingPassCSSource));
+		m_lightingPassShaderProgram = std::make_unique<ge::gl::Program>(lightingCS);
 
-		std::shared_ptr<ge::gl::Shader> lightingVS(std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, m_lightingPassVSSource));
-		std::shared_ptr<ge::gl::Shader> lightingFS(std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, m_lightingPassFSSource));
-		m_lightingPassShaderProgram = std::make_unique<ge::gl::Program>(lightingVS, lightingFS);
+		std::shared_ptr<ge::gl::Shader> renderVS(std::make_shared<ge::gl::Shader>(GL_VERTEX_SHADER, m_renderPassVSSource));
+		std::shared_ptr<ge::gl::Shader> renderFS(std::make_shared<ge::gl::Shader>(GL_FRAGMENT_SHADER, m_renderPassFSSource));
+		m_renderPassShaderProgram = std::make_unique<ge::gl::Program>(renderVS, renderFS);
 
 		m_lightingPassShaderProgram->set1i("gBufferPosition", 4);
 		m_lightingPassShaderProgram->set1i("gBufferNormal", 5);
@@ -90,6 +112,24 @@ void ts::DeferredShadingVT::drawSetup()
 		m_lightingPassShaderProgram->set1i("gBufferShininess", 10);
 
 		m_needToCompileShaders = false;
+		m_needToSetupUniforms = true;
+		m_needToSetupLights = true;
+	}
+
+	if (m_needToSetupLights)
+	{
+		if (m_pointLights && m_pointLights->size() != 0)
+		{
+			m_lightingPassShaderProgram->set1ui("lightCount", m_pointLights->size());
+			m_lightsShaderStorageBuffer = std::make_unique<ge::gl::Buffer>(m_pointLights->size() * sizeof(ge::sg::PointLight), m_pointLights->data(), GL_DYNAMIC_DRAW);
+			m_lightsShaderStorageBuffer->bindBase(GL_SHADER_STORAGE_BUFFER, 0);
+		}
+		else
+		{
+			m_lightingPassShaderProgram->set1ui("lightCount", 0);
+		}
+
+		m_needToSetupLights = false;
 	}
 
 	if (m_needToSetupUniforms)
@@ -99,12 +139,14 @@ void ts::DeferredShadingVT::drawSetup()
 		m_geometryPassShaderProgram->setMatrix4fv("modelMatrix", glm::value_ptr(m_modelMatrix));
 
 		m_lightingPassShaderProgram->set3fv("cameraPos", glm::value_ptr(glm::inverse(m_viewMatrix) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		m_lightingPassShaderProgram->setMatrix4fv("projectionMatrix", glm::value_ptr(m_projectionMatrix));
+		m_lightingPassShaderProgram->set1f("fov", atan(1.0f / m_projectionMatrix[1][1]) * 2.0f);
+		m_lightingPassShaderProgram->set1f("near", m_near);
+		m_lightingPassShaderProgram->set1f("far", m_far);
 		m_lightingPassShaderProgram->setMatrix4fv("viewMatrix", glm::value_ptr(m_viewMatrix));
+		m_lightingPassShaderProgram->set2uiv("screenSize", glm::value_ptr(glm::uvec2(m_screenWidth, m_screenHeight)));
 
-		m_stencilPassShaderProgram->setMatrix4fv("projectionMatrix", glm::value_ptr(m_projectionMatrix));
-		m_stencilPassShaderProgram->setMatrix4fv("viewMatrix", glm::value_ptr(m_viewMatrix));
-		
+		m_renderPassShaderProgram->set2uiv("screenSize", glm::value_ptr(glm::uvec2(m_screenWidth, m_screenHeight)));
+
 		m_needToSetupUniforms = false;
 	}
 
@@ -115,19 +157,24 @@ void ts::DeferredShadingVT::drawSetup()
 		m_gBuffer->init(m_screenWidth, m_screenHeight);
 	}
 
-	if (!m_sphereVAO)
+	if (!m_outputTexture)
 	{
-		m_sphereVAO = std::make_unique<ge::gl::VertexArray>();
+		int textureWidth = m_screenWidth;
+		int textureHeight = m_screenHeight;
 
-		std::shared_ptr<ge::gl::Buffer> VBO = std::make_shared<ge::gl::Buffer>(sizeof(sphereVertices), sphereVertices);
-		m_sphereVAO->addAttrib(VBO, 0, 3, GL_FLOAT, 3 * sizeof(float));
+		m_outputTexture = std::make_unique<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGBA32F, 0, textureWidth, textureHeight, 0);
+		m_outputTexture->setData2D(nullptr, GL_RGBA, GL_FLOAT, 0, GL_TEXTURE_2D);
+		m_outputTexture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		m_outputTexture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
 
-		std::shared_ptr<ge::gl::Buffer> EBO = std::make_shared<ge::gl::Buffer>(sizeof(sphereIndices), sphereIndices);
-		m_sphereVAO->addElementBuffer(EBO);
+	if (!m_dummyVAO)
+	{
+		m_dummyVAO = std::make_unique<ge::gl::VertexArray>();
 	}
 }
 
-void ts::DeferredShadingVT::draw()
+void ts::TiledDeferredShadingVT::draw()
 {
 	if (!m_glScene || !m_sceneProcessed || !m_pointLights || m_pointLights->empty())
 	{
@@ -149,54 +196,23 @@ void ts::DeferredShadingVT::draw()
 	m_glContext->glDisable(GL_BLEND);
 	m_glContext->glDepthMask(GL_TRUE);
 	m_glContext->glEnable(GL_DEPTH_TEST);
-	
+
 	geometryPass();
 
 	m_glContext->glDepthMask(GL_FALSE);
-	m_glContext->glEnable(GL_STENCIL_TEST);
-	m_sphereVAO->bind();
+	m_glContext->glDisable(GL_DEPTH_TEST);
 
-	m_lightingPassShaderProgram->set2uiv("screenSize", glm::value_ptr(glm::uvec2(m_screenWidth, m_screenHeight)));
+	m_outputTexture->bindImage(0, 0, GL_RGBA32F, GL_READ_WRITE, GL_FALSE, 0);
 
-	for (const ge::sg::PointLight& pointLight : *m_pointLights)
-	{
-		glm::mat4 modelMatrix = glm::mat4(1.0f);
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(pointLight.position.x, pointLight.position.y, pointLight.position.z));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(pointLight.radius, pointLight.radius, pointLight.radius));
-		m_stencilPassShaderProgram->setMatrix4fv("modelMatrix", glm::value_ptr(modelMatrix));
-		m_lightingPassShaderProgram->setMatrix4fv("modelMatrix", glm::value_ptr(modelMatrix));
+	lightingPass();
 
-		m_glContext->glDisable(GL_BLEND);
-		m_glContext->glEnable(GL_DEPTH_TEST);
-		m_glContext->glDisable(GL_CULL_FACE);
-		m_glContext->glStencilFunc(GL_ALWAYS, 0, 0);
-		m_glContext->glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
-		m_glContext->glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
-
-		stencilPass(pointLight);
-
-		m_glContext->glEnable(GL_BLEND);
-		m_glContext->glBlendEquation(GL_FUNC_ADD);
-		m_glContext->glBlendFunc(GL_ONE, GL_ONE);
-		m_glContext->glDisable(GL_DEPTH_TEST);
-		m_glContext->glEnable(GL_CULL_FACE);
-		m_glContext->glCullFace(GL_FRONT);
-		m_glContext->glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
-		
-		lightingPass(pointLight);
-
-		m_glContext->glCullFace(GL_BACK);
-	}
-	m_sphereVAO->unbind();
-
-	m_glContext->glDisable(GL_STENCIL_TEST);
-
-	m_gBuffer->readBuffer(GBuffer::OUTPUT_RENDERBUFFER);
 	m_glContext->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	m_glContext->glBlitFramebuffer(0, 0, m_screenWidth, m_screenHeight, 0, 0, m_screenWidth, m_screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	m_dummyVAO->bind();
+	renderPass();
+	m_dummyVAO->unbind();
 }
 
-void ts::DeferredShadingVT::geometryPass()
+void ts::TiledDeferredShadingVT::geometryPass()
 {
 	m_gBuffer->drawBuffers(
 		7,
@@ -255,21 +271,8 @@ void ts::DeferredShadingVT::geometryPass()
 	}
 }
 
-void ts::DeferredShadingVT::stencilPass(const ge::sg::PointLight& pointLight)
+void ts::TiledDeferredShadingVT::lightingPass()
 {
-	m_gBuffer->drawBuffers(0);
-
-	m_glContext->glClear(GL_STENCIL_BUFFER_BIT);
-
-	m_stencilPassShaderProgram->use();
-
-	m_glContext->glDrawElements(GL_TRIANGLES, sizeof(sphereIndices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
-}
-
-void ts::DeferredShadingVT::lightingPass(const ge::sg::PointLight& pointLight)
-{
-	m_gBuffer->drawBuffers(1, GBuffer::OUTPUT_RENDERBUFFER);
-
 	m_gBuffer->bindTexture(GBuffer::Buffers::POSITION_TEXTURE, 4);
 	m_gBuffer->bindTexture(GBuffer::Buffers::NORMAL_TEXTURE, 5);
 	m_gBuffer->bindTexture(GBuffer::Buffers::AMBIENT_TEXTURE, 6);
@@ -278,14 +281,12 @@ void ts::DeferredShadingVT::lightingPass(const ge::sg::PointLight& pointLight)
 	m_gBuffer->bindTexture(GBuffer::Buffers::EMISSIVE_TEXTURE, 9);
 	m_gBuffer->bindTexture(GBuffer::Buffers::SHININESS_TEXTURE, 10);
 
-	m_lightingPassShaderProgram->use();
+	m_lightingPassShaderProgram->dispatch(ceil(static_cast<float>(m_screenWidth) / m_tileSize), ceil(static_cast<float>(m_screenHeight) / m_tileSize), 1);
+}
 
-	m_lightingPassShaderProgram->set4fv("pointLight.position", glm::value_ptr(pointLight.position));
-	m_lightingPassShaderProgram->set4fv("pointLight.color", glm::value_ptr(pointLight.color));
-	m_lightingPassShaderProgram->set1f("pointLight.radius", pointLight.radius);
-	m_lightingPassShaderProgram->set1f("pointLight.constantAttenuationFactor", pointLight.constantAttenuationFactor);
-	m_lightingPassShaderProgram->set1f("pointLight.linearAttenuationFactor", pointLight.linearAttenuationFactor);
-	m_lightingPassShaderProgram->set1f("pointLight.quadraticAttenuationFactor", pointLight.quadraticAttenuationFactor);
-		
-	m_glContext->glDrawElements(GL_TRIANGLES, sizeof(sphereIndices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+void ts::TiledDeferredShadingVT::renderPass()
+{
+	m_renderPassShaderProgram->use();
+
+	m_glContext->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

@@ -13,7 +13,7 @@ void ts::GBuffer::init(int width, int height)
 	m_gBuffer = std::make_unique<ge::gl::Framebuffer>();
 	m_gBuffer->bind(GL_FRAMEBUFFER);
 
-	//position texture
+	//position 
 	m_textures[Buffers::POSITION_TEXTURE] = std::make_shared<ge::gl::Texture>(GL_TEXTURE_2D, GL_RGB16F, 0, m_screenWidth, m_screenHeight, 0);
 	m_textures[Buffers::POSITION_TEXTURE]->setData2D(nullptr, GL_RGB, GL_FLOAT, 0, GL_TEXTURE_2D);
 	m_textures[Buffers::POSITION_TEXTURE]->texParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -63,7 +63,7 @@ void ts::GBuffer::init(int width, int height)
 	m_gBuffer->attachTexture(bufferToAttachment(Buffers::SHININESS_TEXTURE), m_textures[Buffers::SHININESS_TEXTURE]);
 
 	std::shared_ptr<ge::gl::Renderbuffer> outputRenderBuffer = std::make_shared<ge::gl::Renderbuffer>();
-	m_glContext->glNamedRenderbufferStorageMultisample(outputRenderBuffer->getId(), 0, GL_RGB16F, m_screenWidth, m_screenHeight);
+	m_glContext->glNamedRenderbufferStorageMultisample(outputRenderBuffer->getId(), 0, GL_RGB32F, m_screenWidth, m_screenHeight);
 	m_gBuffer->attachRenderbuffer(bufferToAttachment(Buffers::OUTPUT_RENDERBUFFER), outputRenderBuffer);
 
 	std::shared_ptr<ge::gl::Renderbuffer> depthRenderBuffer = std::make_shared<ge::gl::Renderbuffer>();

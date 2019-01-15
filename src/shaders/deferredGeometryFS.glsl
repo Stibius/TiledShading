@@ -29,9 +29,9 @@ layout(location = 6) out vec3 gBufferShininess;
   
 uniform Material material;
 
-in vec2 uv;
 in vec3 FragPos;  
 in vec3 Normal; 
+in vec2 TexCoords;
 
 void main()
 {
@@ -40,16 +40,16 @@ void main()
     gBufferNormal = normalize(Normal);
 
     gBufferAmbient.rgb = material.ambient;
-	if (material.hasAmbientTex) gBufferAmbient.rgb *= texture(material.ambientTex, uv).rgb;
+	if (material.hasAmbientTex) gBufferAmbient.rgb *= texture(material.ambientTex, TexCoords).rgb;
 
     gBufferDiffuse.rgb = material.diffuse;
-	if (material.hasDiffuseTex) gBufferDiffuse.rgb *= texture(material.diffuseTex, uv).rgb;
+	if (material.hasDiffuseTex) gBufferDiffuse.rgb *= texture(material.diffuseTex, TexCoords).rgb;
 
 	gBufferSpecular.rgb = material.specular;
-	if (material.hasSpecularTex) gBufferSpecular.rgb *= texture(material.specularTex, uv).rgb;
+	if (material.hasSpecularTex) gBufferSpecular.rgb *= texture(material.specularTex, TexCoords).rgb;
 
 	gBufferEmissive.rgb = material.emissive;
-	if (material.hasEmissiveTex) gBufferEmissive.rgb *= texture(material.emissiveTex, uv).rgb;
+	if (material.hasEmissiveTex) gBufferEmissive.rgb *= texture(material.emissiveTex, TexCoords).rgb;
 
 	gBufferShininess.r = material.shininess;
 }

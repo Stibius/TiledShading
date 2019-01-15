@@ -74,8 +74,8 @@ namespace ts
 
 	protected:
 
-		Camera* m_camera;
-		const Scene* m_scene;
+		Camera* m_camera = nullptr;
+		const Scene* m_scene = nullptr;
 
 		float m_relativeStepSize = 0.1f;
 		float m_relativeZoomSpeed = 0.1f;

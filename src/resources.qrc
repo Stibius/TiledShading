@@ -1,5 +1,14 @@
 <RCC>
     <qresource prefix="/">
         <file>GUI.qml</file>
+        <file>shaders/forwardVS.glsl</file>
+        <file>shaders/forwardFS.glsl</file>
+        <file>shaders/deferredGeometryVS.glsl</file>
+        <file>shaders/deferredGeometryFS.glsl</file>
+        <file>shaders/deferredLightingVS.glsl</file>
+        <file>shaders/deferredLightingFS.glsl</file>
+        <file>shaders/tiledDeferredRenderVS.glsl</file>
+        <file>shaders/tiledDeferredRenderFS.glsl</file>
+        <file>shaders/tiledDeferredLightingCS.glsl</file>
     </qresource>
 </RCC>

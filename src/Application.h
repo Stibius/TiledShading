@@ -29,6 +29,8 @@ public:
 	static std::shared_ptr<ts::Camera> m_camera;
 	static ts::Scene m_scene;
 
+	static std::string loadResourceFile(const std::string& path);
+
 	static bool init(int& argc, char* argv[], int& exitCode);
 
 	static int run();

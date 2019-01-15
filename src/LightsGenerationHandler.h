@@ -27,7 +27,7 @@ namespace ts
 
 	public slots:
 
-		void generate(int count, float posRange, float radiusMin, float radiusMax);
+		void generate(int count, float minX, float maxX, float minY, float maxY, float minZ, float maxZ, float radiusMin, float radiusMax);
 
 	protected:
 

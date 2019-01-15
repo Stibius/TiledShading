@@ -3,6 +3,7 @@
 #include <Camera.h>
 #include <ForwardShadingVT.h>
 #include <LightedSceneVT.h>
+#include <Application.h>
 
 #include <geGL/geGL.h>
 #include <geSG/Scene.h>
@@ -19,9 +20,8 @@
 ts::Renderer::Renderer()
 {
 	m_noLightVT = std::make_unique<ForwardShadingVT>();
-	std::string shaderDir(APP_RESOURCES"/shaders/");
-	std::string vsSource = ge::core::loadTextFile(shaderDir + "forwardVS.glsl");
-	std::string fsSource = ge::core::loadTextFile(shaderDir + "forwardFS.glsl");
+	std::string vsSource = Application::loadResourceFile(":/shaders/forwardVS.glsl");
+	std::string fsSource = Application::loadResourceFile(":/shaders/forwardFS.glsl");
 	m_noLightVT->setShaders(vsSource, fsSource);
 }
 
