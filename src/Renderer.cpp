@@ -2,6 +2,7 @@
 #include <PointLight.h>
 #include <Camera.h>
 #include <ForwardShadingVT.h>
+#include <SceneVT.h>
 #include <LightedSceneVT.h>
 #include <Application.h>
 
@@ -31,7 +32,7 @@ void ts::Renderer::setViewportSize(int width, int height)
 	m_viewPortHeight = height;
 	m_camera->m_perspective->setAspect(static_cast<float>(m_viewPortWidth) / static_cast<float>(m_viewPortHeight));
 	m_camera->m_perspective->setAspect(static_cast<float>(m_viewPortWidth) / static_cast<float>(m_viewPortHeight));
-	m_lightVT->setViewportSize(width, height);
+	m_VT->setViewportSize(width, height);
 	m_noLightVT->setViewportSize(width, height);
 }
 
@@ -53,9 +54,9 @@ void ts::Renderer::setupGLState()
 	m_glContext->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void ts::Renderer::setVisualizationTechnique(std::unique_ptr<LightedSceneVT> visualizationTechnique)
+void ts::Renderer::setVisualizationTechnique(std::unique_ptr<SceneVT> visualizationTechnique)
 {
-	m_lightVT = std::move(visualizationTechnique);
+	m_VT = std::move(visualizationTechnique);
 	m_needToInitVT = true;
 }
 
@@ -81,38 +82,40 @@ int ts::Renderer::render()
 
 	setupGLState();
 
-	LightedSceneVT* currentVT;
+	SceneVT* currentVT;
 	if (!m_pointLights || m_pointLights->empty())
 	{
 		currentVT = m_noLightVT.get();
 	}
 	else
 	{
-		currentVT = m_lightVT.get();
+		currentVT = m_VT.get();
 	}
 
 	if (m_needToInitVT)
 	{
-		m_lightVT->m_glContext = m_glContext;
-		if (!m_needToProcessScene) m_lightVT->setScene(m_glScene);
-		if (!m_needToSetLightUniforms) m_lightVT->setLights(m_pointLights);
+		m_VT->m_glContext = m_glContext;
+		if (!m_needToProcessScene) m_VT->setScene(m_glScene);
 
 		m_noLightVT->m_glContext = m_glContext;
 
 		m_needToInitVT = false;
+		m_needToSetLightUniforms = true;
 	}
 
 	if (m_needToProcessScene)
 	{
 		m_glScene = ge::glsg::GLSceneProcessor::processScene(m_scene, m_glContext);
-		m_lightVT->setScene(m_glScene);
+		m_VT->setScene(m_glScene);
 		m_noLightVT->setScene(m_glScene);
 		m_needToProcessScene = false;
 	}
 
 	if (m_needToSetLightUniforms)
 	{
-		m_lightVT->setLights(m_pointLights);
+		LightedSceneVT* lightVT = dynamic_cast<LightedSceneVT*>(m_VT.get());
+		if (lightVT) lightVT->setLights(m_pointLights);
+
 		m_needToSetLightUniforms = false;
 	}
 

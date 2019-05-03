@@ -734,7 +734,7 @@ ApplicationWindow
 			GridLayout 
 			{
             	columns: 2
-				rows: 4
+				rows: 6
             	rowSpacing: 10
             	columnSpacing: 10
 
@@ -768,7 +768,7 @@ ApplicationWindow
                 	Layout.row: 1
 					Layout.preferredWidth: 180
 
-                    model: ["Forward Shading", "Deferred Shading", "Tiled Deferred Shading"]
+                    model: ["Forward Shading", "Deferred Shading", "Tiled Deferred Shading", "GBuffer"]
 
 					currentIndex: renderingSettingsHandler.visualizationTechnique
 
@@ -781,6 +781,33 @@ ApplicationWindow
 					Layout.column: 0
                 	Layout.row: 2
 
+					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.GBUFFER
+
+                	text: "GBuffer texture:"
+            	}
+				ComboBox 
+				{
+				    id: cbGBufferTexture
+
+				    Layout.column: 1
+                	Layout.row: 2
+					Layout.preferredWidth: 180
+
+					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.GBUFFER
+
+                    model: ["Position", "Normal", "Ambient", "Diffuse", "Specular", "Emissive", "Shininess"]
+
+					currentIndex: renderingSettingsHandler.gBufferTexture
+
+					Binding { target: cbGBufferTexture; property: "currentIndex"; value: renderingSettingsHandler.gBufferTexture }
+                	Binding { target: renderingSettingsHandler; property: "gBufferTexture"; value: cbGBufferTexture.currentIndex }
+                }
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 3
+
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
                 	text: "Tile size:"
@@ -790,7 +817,7 @@ ApplicationWindow
                 	id: sbTileSize
 
 					Layout.column: 1
-                	Layout.row: 2
+                	Layout.row: 3
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -807,7 +834,7 @@ ApplicationWindow
 				Label 
 				{
 					Layout.column: 0
-                	Layout.row: 3
+                	Layout.row: 4
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -818,7 +845,7 @@ ApplicationWindow
                 	id: sbMaxLightsPerTile
 
 					Layout.column: 1
-                	Layout.row: 3
+                	Layout.row: 4
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -830,6 +857,30 @@ ApplicationWindow
 
 					Binding { target: sbMaxLightsPerTile; property: "value"; value: renderingSettingsHandler.maxLightsPerTile }
                 	Binding { target: renderingSettingsHandler; property: "maxLightsPerTile"; value: sbMaxLightsPerTile.value }
+            	}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 5
+
+					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
+
+                	text: "Show tiles:"
+            	}
+				CheckBox 
+				{
+                	id: chkShowTiles
+
+					Layout.column: 1
+                	Layout.row: 5
+
+					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
+
+					checked: renderingSettingsHandler.showTiles
+
+					Binding { target: chkShowTiles; property: "checked"; value: renderingSettingsHandler.showTiles }
+                	Binding { target: renderingSettingsHandler; property: "showTiles"; value: chkShowTiles.checked }
             	}
 			}
 		}

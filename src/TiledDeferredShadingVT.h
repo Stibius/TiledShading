@@ -53,6 +53,8 @@ namespace ts
 
 		void setMaxLightsPerTile(int maxLightsPerTile);
 
+		void showTiles(bool showTiles);
+
 		virtual void setShaders(
 			const std::string& geometryPassVSSource,
 			const std::string& geometryPassFSSource,
@@ -71,6 +73,8 @@ namespace ts
 		int m_tileSize = 16;
 		float m_near;
 		float m_far;
+
+		bool m_showTiles = false;
 
 		std::unique_ptr<ge::gl::VertexArray> m_dummyVAO = nullptr;
 

@@ -22,6 +22,7 @@ namespace ge
 namespace ts
 {
 	class GBuffer;
+	class GBufferVT;
 
 	/**
 	* This VT draws a ge::glsg::GLScene with lights and transformations using deferred Phong shading.

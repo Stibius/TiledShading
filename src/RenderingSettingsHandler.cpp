@@ -3,6 +3,7 @@
 #include <ForwardShadingVT.h>
 #include <DeferredShadingVT.h>
 #include <TiledDeferredShadingVT.h>
+#include <GBufferVT.h>
 #include <Application.h>
 
 #include <geGL/geGL.h>
@@ -37,6 +38,19 @@ void ts::RenderingSettingsHandler::setVisualizationTechnique(VisualizationTechni
 	}
 }
 
+void ts::RenderingSettingsHandler::setGBufferTexture(GBufferTexture gBufferTexture)
+{
+	if (gBufferTexture != getGBufferTexture())
+	{
+		m_currentGBufferTexture = gBufferTexture;
+
+		setRenderer();
+
+		emit gBufferTextureChanged(gBufferTexture);
+		emit render();
+	}
+}
+
 void ts::RenderingSettingsHandler::setTileSize(int value)
 {
 	if (value != getTileSize())
@@ -48,6 +62,7 @@ void ts::RenderingSettingsHandler::setTileSize(int value)
 		}
 
 		emit tileSizeChanged(value);
+		emit render();
 	}
 }
 
@@ -62,12 +77,33 @@ void ts::RenderingSettingsHandler::setMaxLightsPerTile(int value)
 		}
 
 		emit maxLightsPerTileChanged(value);
+		emit render();
+	}
+}
+
+void ts::RenderingSettingsHandler::setShowTiles(bool value)
+{
+	if (value != getShowTiles())
+	{
+		m_showTiles = value;
+		if (m_tiledDeferredVT != nullptr)
+		{
+			m_tiledDeferredVT->showTiles(value);
+		}
+
+		emit showTilesChanged(value);
+		emit render();
 	}
 }
 
 ts::RenderingSettingsHandler::VisualizationTechnique ts::RenderingSettingsHandler::getVisualizationTechnique() const
 {
 	return m_currentVT;
+}
+
+ts::RenderingSettingsHandler::GBufferTexture ts::RenderingSettingsHandler::getGBufferTexture() const
+{
+	return m_currentGBufferTexture;
 }
 
 int ts::RenderingSettingsHandler::getTileSize() const
@@ -78,6 +114,11 @@ int ts::RenderingSettingsHandler::getTileSize() const
 int ts::RenderingSettingsHandler::getMaxLightsPerTile() const
 {
 	return m_maxLightsPerTile;
+}
+
+bool ts::RenderingSettingsHandler::getShowTiles() const
+{
+	return m_showTiles;
 }
 
 void ts::RenderingSettingsHandler::setRenderer()
@@ -127,11 +168,23 @@ void ts::RenderingSettingsHandler::setRenderer()
 		tiledDeferredVT->setShaders(geometryVsSource, geometryFsSource, lightingCsSource, renderVsSource, renderFsSource);
 		tiledDeferredVT->setTileSize(m_tileSize);
 		tiledDeferredVT->setMaxLightsPerTile(m_maxLightsPerTile);
+		tiledDeferredVT->showTiles(m_showTiles);
 		m_tiledDeferredVT = tiledDeferredVT.get();
 		m_renderer->setVisualizationTechnique(std::move(tiledDeferredVT));
 	}
 	break;
 	default:
+	case VisualizationTechnique::GBUFFER:
+	{
+		std::string vsSource = Application::loadResourceFile(":/shaders/deferredGeometryVS.glsl");
+		std::string fsSource = Application::loadResourceFile(":/shaders/deferredGeometryFS.glsl");
+
+		std::unique_ptr<GBufferVT> gBufferVT = std::make_unique<GBufferVT>();
+		gBufferVT->setShaders(vsSource, fsSource);
+		gBufferVT->setDrawBuffer(static_cast<ts::GBuffer::Buffers>(m_currentGBufferTexture));
+		m_renderer->setVisualizationTechnique(std::move(gBufferVT));
+	}
+	break;
 		break;
 	}
 }

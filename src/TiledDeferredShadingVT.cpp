@@ -67,6 +67,32 @@ void ts::TiledDeferredShadingVT::setMaxLightsPerTile(int maxLightsPerTile)
 	m_needToCompileShaders = true;
 }
 
+void ts::TiledDeferredShadingVT::showTiles(bool showTiles)
+{
+	m_showTiles = showTiles;
+
+	if (showTiles)
+	{
+		size_t pos1 = m_lightingPassCSSource.find("imageStore(");
+		if (pos1 == std::string::npos) return;
+		size_t pos2 = m_lightingPassCSSource.find(";", pos1);
+		if (pos2 == std::string::npos) return;
+		m_lightingPassCSSource.replace(pos1, pos2 - pos1, "imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), 1.0f))");
+
+		m_needToCompileShaders = true;
+	}
+	else
+	{
+		size_t pos1 = m_lightingPassCSSource.find("imageStore(");
+		if (pos1 == std::string::npos) return;
+		size_t pos2 = m_lightingPassCSSource.find(";", pos1);
+		if (pos2 == std::string::npos) return;
+		m_lightingPassCSSource.replace(pos1, pos2 - pos1, "imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(color, 1.0))");
+
+		m_needToCompileShaders = true;
+	}
+}
+
 void ts::TiledDeferredShadingVT::setShaders(
 	const std::string& geometryPassVSSource, 
 	const std::string& geometryPassFSSource, 

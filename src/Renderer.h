@@ -32,7 +32,7 @@ namespace ge
 namespace ts
 {
 	class Camera;
-	class LightedSceneVT;
+	class SceneVT;
 	class ForwardShadingVT;
 
 	class Renderer 
@@ -54,7 +54,7 @@ namespace ts
 
 		void setViewportSize(int width, int height);
 
-		virtual void setVisualizationTechnique(std::unique_ptr<LightedSceneVT> visualizationTechnique);
+		virtual void setVisualizationTechnique(std::unique_ptr<SceneVT> visualizationTechnique);
 
 		virtual void setScene(const ge::sg::Scene& scene);
 
@@ -74,7 +74,7 @@ namespace ts
 		std::shared_ptr<Camera> m_camera = nullptr;
 		std::shared_ptr<std::vector<ge::sg::PointLight>> m_pointLights = nullptr;
 		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer = nullptr;
-		std::unique_ptr<LightedSceneVT> m_lightVT = nullptr;
+		std::unique_ptr<SceneVT> m_VT = nullptr;
 		std::unique_ptr<ForwardShadingVT> m_noLightVT = nullptr;
 		bool m_needToProcessScene = false;
 		bool m_needToSetLightUniforms = true;

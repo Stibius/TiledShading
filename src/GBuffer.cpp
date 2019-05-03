@@ -100,6 +100,30 @@ void ts::GBuffer::drawBuffers(GLsizei n, ...) const
 	delete[] attachments;
 }
 
+void ts::GBuffer::drawBuffers(const std::vector<Buffers> buffers) const
+{
+	int n = buffers.size();
+
+	if (n == 0)
+	{
+		m_gBuffer->drawBuffer(GL_NONE);
+
+		return;
+	}
+
+	m_gBuffer->bind(GL_DRAW_FRAMEBUFFER);
+
+	std::vector<GLenum> attachments;
+
+	for (GLsizei i = 0; i < n; i++)
+	{
+		Buffers buffer = buffers[i];
+		attachments.push_back(bufferToAttachment(buffer));
+	}
+
+	m_gBuffer->drawBuffers(attachments);
+}
+
 void ts::GBuffer::readBuffer(Buffers buffer) const
 {
 	m_gBuffer->bind(GL_READ_FRAMEBUFFER);

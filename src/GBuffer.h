@@ -56,6 +56,8 @@ namespace ts
 
 		virtual void drawBuffers(GLsizei n, ...) const;
 
+		virtual void drawBuffers(const std::vector<Buffers> buffers) const;
+
 		virtual void readBuffer(Buffers buffer) const;
 
 		virtual void bindTexture(Buffers texture, GLuint unit) const;

@@ -210,5 +210,4 @@ void main()
 	}
 
 	imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(color, 1.0));
-	//imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(lightCountInTile / 255.0, lightCountInTile / 255.0, lightCountInTile / 255.0, 1.0f));
 }
