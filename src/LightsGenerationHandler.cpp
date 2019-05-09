@@ -33,11 +33,8 @@ void ts::LightsGenerationHandler::generate(int count, float minX, float maxX, fl
 		light.color.b = static_cast<float>(rand()) / RAND_MAX;
 		light.color.a = 1.0f;
 
-		
 		glm::vec3 minPos = center + glm::vec3(minX, minY, minZ) * (boundingBox.max - boundingBox.min);
 		glm::vec3 maxPos = center + glm::vec3(maxX, maxY, maxZ) * (boundingBox.max - boundingBox.min);
-		//glm::vec3 minPos = boundingBox.min * posRange;
-		//glm::vec3 maxPos = boundingBox.max * posRange;
 		light.position.x = minPos.x + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.x - minPos.x));
 		light.position.y = minPos.y + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.y - minPos.y));
 		light.position.z = minPos.z + ((static_cast<float>(rand()) / RAND_MAX) * (maxPos.z - minPos.z));

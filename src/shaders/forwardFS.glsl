@@ -47,6 +47,12 @@ in vec2 TexCoords;
 float computeAttenuation(in PointLight pointLight, in vec3 position)
 {
     float dist = distance(pointLight.position.xyz, position);
+
+	if (dist > pointLight.radius)
+	{
+		return 0.0;
+	}
+
 	float fl = pointLight.linearAttenuationFactor;
 	float fc = pointLight.constantAttenuationFactor;
 	float fq = pointLight.quadraticAttenuationFactor;

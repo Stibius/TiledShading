@@ -1,8 +1,9 @@
 #version 450
 
-layout (local_size_x = 16, local_size_y = 16) in;
-
 const uint MAX_LIGHTS_PER_TILE = 256;
+const uint WORK_GROUP_SIZE = 16;
+
+layout (local_size_x = WORK_GROUP_SIZE, local_size_y = WORK_GROUP_SIZE) in;
 
 struct PointLight 
 {
@@ -27,6 +28,7 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform vec3 cameraPos;
 uniform uvec2 screenSize;
+uniform bool showTiles;
 
 uniform sampler2D gBufferPosition;
 uniform sampler2D gBufferNormal;
@@ -46,6 +48,12 @@ shared uint maxDepth;
 float computeAttenuation(in PointLight pointLight, in vec3 position)
 {
     float dist = distance(pointLight.position.xyz, position);
+
+	if (dist > pointLight.radius)
+	{
+		return 0.0;
+	}
+
 	float fl = pointLight.linearAttenuationFactor;
 	float fc = pointLight.constantAttenuationFactor;
 	float fq = pointLight.quadraticAttenuationFactor;
@@ -103,7 +111,7 @@ void main()
 	vec2 texCoords = gl_GlobalInvocationID.xy / (screenSize - vec2(1, 1));
 	vec3 fragPos = texture(gBufferPosition, texCoords).rgb;
 	vec3 fragPosView = vec3(viewMatrix * vec4(fragPos, 1.0));
-	float depthf = (-fragPosView.z - near) / (far - near);
+	float depthf = (abs(fragPosView.z) - abs(near)) / abs(far - near);
 	uint depth = uint(depthf * 0xFFFFFFFF);
 	if (gl_LocalInvocationID.x == 0 && gl_LocalInvocationID.y == 0)
 	{
@@ -121,7 +129,7 @@ void main()
 
 	float minDepthf = minDepth / float(0xFFFFFFFF);
     float maxDepthf = maxDepth / float(0xFFFFFFFF);
-
+	
     float aspect = screenSize.x / float(screenSize.y);
 	float viewportHalfHeight = tan(fov / 2.0);
 	float viewportHalfWidth = viewportHalfHeight * aspect;
@@ -145,28 +153,26 @@ void main()
 	frustumNormals[2] = normalize(cross(tileBottomRightCorner, tileBottomLeftCorner));
 	//left
 	frustumNormals[3] = normalize(cross(tileBottomLeftCorner, tileTopLeftCorner));
-
+	
 	uint localThreadCount = gl_WorkGroupSize.x * gl_WorkGroupSize.y;
-	uint localThreadId = gl_LocalInvocationID.x + (gl_LocalInvocationID.y * gl_WorkGroupSize.x);
 	uint iterationCount = (lightCount / localThreadCount) + 1;	
 
 	for (int i = 0; i < iterationCount; i++)
 	{
-	    uint lightId = (i * localThreadCount) + localThreadId;
+	    uint lightId = (i * localThreadCount) + gl_LocalInvocationIndex;
 
 	    if (lightId < lightCount && lightCountInTile < MAX_LIGHTS_PER_TILE)
 		{
 		    PointLight pointLight = pointLights[lightId];
-
 		    vec3 lightPosView = vec3(viewMatrix * pointLight.position);
-			float lightDepthf = (-lightPosView.z - near) / (far - near);
+			float lightDepthf = (abs(lightPosView.z) - abs(near)) / abs(far - near);
 
 			if (lightDepthf - pointLight.radius < maxDepthf && lightDepthf + pointLight.radius > minDepthf)
             {
 		        bool inFrustum = true;
-		        for (int j = 0; j < 4 && inFrustum; j++)
+		        for (uint j = 0; j < 4 && inFrustum; j++)
 		        {
-			        float distance = dot(frustumNormals[j], lightPosView);
+			        float distance = dot(vec3(frustumNormals[j]), lightPosView);
 		            inFrustum = (-pointLight.radius <= distance);
 		        }
 
@@ -181,14 +187,7 @@ void main()
 			}
 		}
 	}
-
-	barrier();
-
-	if (gl_LocalInvocationID.x == 0 && gl_LocalInvocationID.y == 0 && lightCountInTile > MAX_LIGHTS_PER_TILE)
-	{
-	    lightCountInTile = MAX_LIGHTS_PER_TILE;
-	}
-
+	
 	barrier();
 
 	vec3 color = vec3(0.0, 0.0, 0.0);
@@ -209,5 +208,12 @@ void main()
 	    }
 	}
 
-	imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(color, 1.0));
+	if (showTiles)
+	{
+	    imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), 1.0f));
+	}
+	else
+	{
+		imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(color, 1.0));
+	}
 }

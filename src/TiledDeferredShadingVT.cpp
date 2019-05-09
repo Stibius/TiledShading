@@ -46,11 +46,11 @@ void ts::TiledDeferredShadingVT::setProjectionMatrix(glm::mat4 projectionMatrix)
 
 void ts::TiledDeferredShadingVT::setTileSize(int size)
 {
-	size_t pos1 = m_lightingPassCSSource.find("local_size_x");
+	size_t pos1 = m_lightingPassCSSource.find("const uint WORK_GROUP_SIZE");
 	if (pos1 == std::string::npos) return;
-	size_t pos2 = m_lightingPassCSSource.find(")", pos1);
+	size_t pos2 = m_lightingPassCSSource.find(";", pos1);
 	if (pos2 == std::string::npos) return;
-	m_lightingPassCSSource.replace(pos1, pos2 - pos1, "local_size_x = " + std::to_string(size) + ", local_size_y = " + std::to_string(size));
+	m_lightingPassCSSource.replace(pos1, pos2 - pos1, "const uint WORK_GROUP_SIZE = " + std::to_string(size));
 
 	m_tileSize = size;
 	m_needToCompileShaders = true;
@@ -58,11 +58,11 @@ void ts::TiledDeferredShadingVT::setTileSize(int size)
 
 void ts::TiledDeferredShadingVT::setMaxLightsPerTile(int maxLightsPerTile)
 {
-	size_t pos1 = m_lightingPassCSSource.find("MAX_LIGHTS_PER_TILE");
+	size_t pos1 = m_lightingPassCSSource.find("const uint MAX_LIGHTS_PER_TILE");
 	if (pos1 == std::string::npos) return;
 	size_t pos2 = m_lightingPassCSSource.find(";", pos1);
 	if (pos2 == std::string::npos) return;
-	m_lightingPassCSSource.replace(pos1, pos2 - pos1, "MAX_LIGHTS_PER_TILE = " + std::to_string(maxLightsPerTile));
+	m_lightingPassCSSource.replace(pos1, pos2 - pos1, "const uint MAX_LIGHTS_PER_TILE = " + std::to_string(maxLightsPerTile));
 
 	m_needToCompileShaders = true;
 }
@@ -71,26 +71,7 @@ void ts::TiledDeferredShadingVT::showTiles(bool showTiles)
 {
 	m_showTiles = showTiles;
 
-	if (showTiles)
-	{
-		size_t pos1 = m_lightingPassCSSource.find("imageStore(");
-		if (pos1 == std::string::npos) return;
-		size_t pos2 = m_lightingPassCSSource.find(";", pos1);
-		if (pos2 == std::string::npos) return;
-		m_lightingPassCSSource.replace(pos1, pos2 - pos1, "imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), 1.0f))");
-
-		m_needToCompileShaders = true;
-	}
-	else
-	{
-		size_t pos1 = m_lightingPassCSSource.find("imageStore(");
-		if (pos1 == std::string::npos) return;
-		size_t pos2 = m_lightingPassCSSource.find(";", pos1);
-		if (pos2 == std::string::npos) return;
-		m_lightingPassCSSource.replace(pos1, pos2 - pos1, "imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(color, 1.0))");
-
-		m_needToCompileShaders = true;
-	}
+	m_needToSetupUniforms = true;
 }
 
 void ts::TiledDeferredShadingVT::setShaders(
@@ -170,6 +151,7 @@ void ts::TiledDeferredShadingVT::drawSetup()
 		m_lightingPassShaderProgram->set1f("far", m_far);
 		m_lightingPassShaderProgram->setMatrix4fv("viewMatrix", glm::value_ptr(m_viewMatrix));
 		m_lightingPassShaderProgram->set2uiv("screenSize", glm::value_ptr(glm::uvec2(m_screenWidth, m_screenHeight)));
+		m_lightingPassShaderProgram->set1i("showTiles", m_showTiles);
 
 		m_renderPassShaderProgram->set2uiv("screenSize", glm::value_ptr(glm::uvec2(m_screenWidth, m_screenHeight)));
 
