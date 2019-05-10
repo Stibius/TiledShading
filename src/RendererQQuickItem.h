@@ -15,6 +15,7 @@ namespace ts
 	public:
 
 		Q_PROPERTY(float renderTime MEMBER m_renderTime NOTIFY renderTimeChanged)
+		Q_PROPERTY(bool showRenderTime READ getShowRenderTime WRITE setShowRenderTime NOTIFY showRenderTimeChanged)
 
 		RendererQQuickItem();
 
@@ -28,11 +29,17 @@ namespace ts
 
 		virtual ~RendererQQuickItem() = default;
 
+		void setShowRenderTime(bool value);
+
 		Renderer* getRenderer() const;
+
+		bool getShowRenderTime() const;
 
 	signals:
 
 		void renderTimeChanged(float time);
+
+		void showRenderTimeChanged(bool value);
 
 	public slots:
 
@@ -50,6 +57,8 @@ namespace ts
 
 		std::unique_ptr<Renderer> m_renderer = std::make_unique<Renderer>();
 		float m_renderTime;
+		bool m_showRenderTime = true;
+		bool m_firstDraw = true;
 	};
 }
 

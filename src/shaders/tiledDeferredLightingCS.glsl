@@ -210,7 +210,14 @@ void main()
 
 	if (showTiles)
 	{
-	    imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), 1.0f));
+	    if (gl_LocalInvocationID.x == 0 || gl_LocalInvocationID.y == 0)
+	    {
+	        imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(0.5, 0.5, 0.5, 1.0));
+	    }
+		else
+		{
+	        imageStore(outputTex, ivec2(gl_GlobalInvocationID.xy), vec4(lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), lightCountInTile / float(MAX_LIGHTS_PER_TILE), 1.0f));
+		}
 	}
 	else
 	{

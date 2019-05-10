@@ -119,6 +119,8 @@ ApplicationWindow
 			{ 
 			    id: renderTimeText
 
+				visible: rendererItem.showRenderTime
+
 			    text: qsTr("Render time: ") + rendererItem.renderTime.toFixed(2) + qsTr(" ms")
 			}
 
@@ -734,7 +736,7 @@ ApplicationWindow
 			GridLayout 
 			{
             	columns: 2
-				rows: 6
+				rows: 7
             	rowSpacing: 10
             	columnSpacing: 10
 
@@ -758,6 +760,26 @@ ApplicationWindow
 					Layout.column: 0
                 	Layout.row: 1
 
+                	text: "Show render time:"
+            	}
+				CheckBox 
+				{
+                	id: chkShowRenderTime
+
+					Layout.column: 1
+                	Layout.row: 1
+
+					checked: rendererItem.showRenderTime
+
+					Binding { target: chkShowRenderTime; property: "checked"; value: rendererItem.showRenderTime }
+                	Binding { target: rendererItem; property: "showRenderTime"; value: chkShowRenderTime.checked }
+            	}
+
+				Label 
+				{
+					Layout.column: 0
+                	Layout.row: 2
+
                 	text: "Rendering technique:"
             	}
 				ComboBox 
@@ -765,7 +787,7 @@ ApplicationWindow
 				    id: cbVisualizationTechnique
 
 				    Layout.column: 1
-                	Layout.row: 1
+                	Layout.row: 2
 					Layout.preferredWidth: 180
 
                     model: ["Forward Shading", "Deferred Shading", "Tiled Deferred Shading", "GBuffer"]
@@ -779,7 +801,7 @@ ApplicationWindow
 				Label 
 				{
 					Layout.column: 0
-                	Layout.row: 2
+                	Layout.row: 3
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.GBUFFER
 
@@ -790,7 +812,7 @@ ApplicationWindow
 				    id: cbGBufferTexture
 
 				    Layout.column: 1
-                	Layout.row: 2
+                	Layout.row: 3
 					Layout.preferredWidth: 180
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.GBUFFER
@@ -806,7 +828,7 @@ ApplicationWindow
 				Label 
 				{
 					Layout.column: 0
-                	Layout.row: 3
+                	Layout.row: 4
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -817,7 +839,7 @@ ApplicationWindow
                 	id: sbTileSize
 
 					Layout.column: 1
-                	Layout.row: 3
+                	Layout.row: 4
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -834,7 +856,7 @@ ApplicationWindow
 				Label 
 				{
 					Layout.column: 0
-                	Layout.row: 4
+                	Layout.row: 5
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -845,7 +867,7 @@ ApplicationWindow
                 	id: sbMaxLightsPerTile
 
 					Layout.column: 1
-                	Layout.row: 4
+                	Layout.row: 5
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -862,7 +884,7 @@ ApplicationWindow
 				Label 
 				{
 					Layout.column: 0
-                	Layout.row: 5
+                	Layout.row: 6
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 
@@ -873,7 +895,7 @@ ApplicationWindow
                 	id: chkShowTiles
 
 					Layout.column: 1
-                	Layout.row: 5
+                	Layout.row: 6
 
 					visible: renderingSettingsHandler.visualizationTechnique == RenderingSettingsHandler.TILED_DEFERRED_SHADING
 

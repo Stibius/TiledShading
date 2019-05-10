@@ -15,9 +15,25 @@ void ts::RendererQQuickItem::render()
 	window()->update();
 }
 
+void ts::RendererQQuickItem::setShowRenderTime(bool value)
+{
+	if (value != getShowRenderTime())
+	{
+		m_showRenderTime = value;
+		
+		emit showRenderTimeChanged(value);
+		render();
+	}
+}
+
 ts::Renderer* ts::RendererQQuickItem::getRenderer() const
 {
 	return m_renderer.get();
+}
+
+bool ts::RendererQQuickItem::getShowRenderTime() const
+{
+	return m_showRenderTime;
 }
 
 void ts::RendererQQuickItem::onWindowChanged(QQuickWindow* win)
@@ -38,14 +54,17 @@ void ts::RendererQQuickItem::beforeRendering()
 	float time = m_renderer->render() / 1000.0f;
 	window()->resetOpenGLState();
 
-	static bool firstDraw = true; // updating rendering time in the GUI causes another redraw, only do it once
-	if (firstDraw)
+	// updating rendering time in the GUI causes another redraw, only do it once
+	if (m_showRenderTime)
 	{
-		m_renderTime = time;
-		emit renderTimeChanged(time);
-	}
+		if (m_firstDraw)
+		{
+			m_renderTime = time;
+			emit renderTimeChanged(time);
+		}
 
-	firstDraw = !firstDraw;
+		m_firstDraw = !m_firstDraw;
+	}
 }
 
 void ts::RendererQQuickItem::onSynchronize()
