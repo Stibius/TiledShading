@@ -46,17 +46,17 @@ namespace ts
 
 		virtual ~DeferredShadingVT() = default;
 
-		void setViewportSize(int width, int height) override;
+		virtual void setViewportSize(int width, int height) override;
 
-		virtual void setShaders(
+		void setShaders(
 			const std::string& geometryPassVSSource, 
 			const std::string& geometryPassFSSource,
 			const std::string& lightingPassVSSource,
 			const std::string& lightingPassFSSource);
 
-		void drawSetup() override;
+		virtual void drawSetup() override;
 
-		void draw() override;
+		virtual void draw() override;
 
 	protected:
 
@@ -79,11 +79,11 @@ namespace ts
 
 		bool m_needToCompileShaders = false;
 
-		virtual void geometryPass();
+		void geometryPass();
 
-		virtual void stencilPass(const ge::sg::PointLight& pointLight);
+		void stencilPass(const ge::sg::PointLight& pointLight);
 
-		virtual void lightingPass(const ge::sg::PointLight& pointLight);
+		void lightingPass(const ge::sg::PointLight& pointLight);
 	};
 }
 

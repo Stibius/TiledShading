@@ -52,15 +52,15 @@ namespace ts
 
 		virtual ~GBuffer() = default;
 
-		virtual void init(int width, int height);
+		void init(int width, int height);
 
-		virtual void drawBuffers(GLsizei n, ...) const;
+		void drawBuffers(GLsizei n, ...) const;
 
-		virtual void drawBuffers(const std::vector<Buffers> buffers) const;
+		void drawBuffers(const std::vector<Buffers> buffers) const;
 
-		virtual void readBuffer(Buffers buffer) const;
+		void readBuffer(Buffers buffer) const;
 
-		virtual void bindTexture(Buffers texture, GLuint unit) const;
+		void bindTexture(Buffers texture, GLuint unit) const;
 
 	protected:
 
@@ -70,7 +70,7 @@ namespace ts
 		std::unique_ptr<ge::gl::Framebuffer> m_gBuffer = nullptr;
 		std::shared_ptr<ge::gl::Texture> m_textures[NUM_TEXTURES];
 
-		virtual GLenum bufferToAttachment(Buffers buffer) const;
+		GLenum bufferToAttachment(Buffers buffer) const;
 	};
 }
 

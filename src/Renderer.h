@@ -54,15 +54,15 @@ namespace ts
 
 		void setViewportSize(int width, int height);
 
-		virtual void setVisualizationTechnique(std::unique_ptr<SceneVT> visualizationTechnique);
+		void setVisualizationTechnique(std::unique_ptr<SceneVT> visualizationTechnique);
 
-		virtual void setScene(const ge::sg::Scene& scene);
+		void setScene(const ge::sg::Scene& scene);
 
-		virtual void setLights(std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights);
+		void setLights(std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights);
 
-		virtual void setCamera(std::shared_ptr<Camera> camera);
+		void setCamera(std::shared_ptr<Camera> camera);
 
-		virtual int render();
+		int render();
 
 	protected:
 
@@ -80,6 +80,6 @@ namespace ts
 		bool m_needToSetLightUniforms = true;
 		bool m_needToInitVT = true;
 
-		virtual void setupGLState();
+		void setupGLState();
 	};
 }

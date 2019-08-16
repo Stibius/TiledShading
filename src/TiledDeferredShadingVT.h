@@ -45,9 +45,9 @@ namespace ts
 
 		virtual ~TiledDeferredShadingVT() = default;
 
-		void setViewportSize(int width, int height) override;
+		virtual void setViewportSize(int width, int height) override;
 
-		void setProjectionMatrix(glm::mat4 projectionMatrix) override;
+		virtual void setProjectionMatrix(glm::mat4 projectionMatrix) override;
 
 		void setTileSize(int size);
 
@@ -55,16 +55,16 @@ namespace ts
 
 		void showTiles(bool showTiles);
 
-		virtual void setShaders(
+		void setShaders(
 			const std::string& geometryPassVSSource,
 			const std::string& geometryPassFSSource,
 			const std::string& renderPassVSSource,
 			const std::string& renderPassFSSource,
 			const std::string& lightingPassCSSource);
 
-		void drawSetup() override;
+		virtual void drawSetup() override;
 
-		void draw() override;
+		virtual void draw() override;
 
 	protected:
 
@@ -93,11 +93,11 @@ namespace ts
 
 		bool m_needToCompileShaders = false;
 
-		virtual void geometryPass();
+		void geometryPass();
 
-		virtual void lightingPass();
+		void lightingPass();
 
-		virtual void renderPass();
+		void renderPass();
 	};
 }
 

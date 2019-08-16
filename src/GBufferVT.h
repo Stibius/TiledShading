@@ -34,17 +34,17 @@ namespace ts
 
 		virtual ~GBufferVT() = default;
 
-		void setViewportSize(int width, int height) override;
+		virtual void setViewportSize(int width, int height) override;
 
-		virtual void setShaders(
+		void setShaders(
 			const std::string& VSSource,
 			const std::string& FSSource);
 
-		virtual void setDrawBuffer(GBuffer::Buffers buffer);
+		void setDrawBuffer(GBuffer::Buffers buffer);
 
-		void drawSetup() override;
+		virtual void drawSetup() override;
 
-		void draw() override;
+		virtual void draw() override;
 
 	protected:
 

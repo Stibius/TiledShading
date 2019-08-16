@@ -47,13 +47,13 @@ namespace ts
 
 		virtual ~ForwardShadingVT() = default;
 
-		void setViewportSize(int width, int height) override;
+		virtual void setViewportSize(int width, int height) override;
 
-		virtual void setShaders(const std::string& vsSource, const std::string& fsSource);
+		void setShaders(const std::string& vsSource, const std::string& fsSource);
 
-		void drawSetup() override;
+		virtual void drawSetup() override;
 
-		void draw() override;
+		virtual void draw() override;
 
 	protected:
 

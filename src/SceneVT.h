@@ -61,9 +61,9 @@ namespace ts
 
 		virtual void setViewportSize(int width, int height) = 0;
 
-		virtual void setScene(std::shared_ptr<ge::glsg::GLScene> scene);
+		void setScene(std::shared_ptr<ge::glsg::GLScene> scene);
 
-		virtual int semantic2Attribute(ge::sg::AttributeDescriptor::Semantic semantic);
+		int semantic2Attribute(ge::sg::AttributeDescriptor::Semantic semantic);
 
 		virtual void setProjectionMatrix(glm::mat4 projectionMatrix);
 
@@ -85,6 +85,6 @@ namespace ts
 		bool m_sceneProcessed = false;
 		bool m_needToSetupUniforms = true;
 
-		virtual void processScene();
+		void processScene();
 	};
 }

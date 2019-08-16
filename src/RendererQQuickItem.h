@@ -43,15 +43,15 @@ namespace ts
 
 	public slots:
 
-		virtual void onSynchronize();
+		void onSynchronize();
 
-		virtual void render();
+		void render();
 
 	private slots:
 
-		virtual void onWindowChanged(QQuickWindow* win);
+		void onWindowChanged(QQuickWindow* win);
 
-		virtual void beforeRendering();
+		void beforeRendering();
 
 	protected:
 

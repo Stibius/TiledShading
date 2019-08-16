@@ -22,7 +22,7 @@ namespace ts
 
 	public:
 
-		virtual void setLights(std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights);
+		void setLights(std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights);
 
 	protected:
 
