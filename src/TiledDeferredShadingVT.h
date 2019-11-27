@@ -35,19 +35,19 @@ namespace ts
 
 		TiledDeferredShadingVT() = default;
 
-		TiledDeferredShadingVT(const TiledDeferredShadingVT& vt) = delete;
+		TiledDeferredShadingVT(const TiledDeferredShadingVT& other) = delete;
 
-		TiledDeferredShadingVT(TiledDeferredShadingVT&& vt) = default;
+		TiledDeferredShadingVT(TiledDeferredShadingVT&& other) = default;
 
-		TiledDeferredShadingVT& operator=(const TiledDeferredShadingVT& vt) = delete;
+		TiledDeferredShadingVT& operator=(const TiledDeferredShadingVT& other) = delete;
 
-		TiledDeferredShadingVT& operator=(TiledDeferredShadingVT&& vt) = default;
+		TiledDeferredShadingVT& operator=(TiledDeferredShadingVT&& other) = default;
 
-		virtual ~TiledDeferredShadingVT() = default;
+		~TiledDeferredShadingVT() override = default;
 
-		virtual void setViewportSize(int width, int height) override;
+		void setViewportSize(int width, int height) override;
 
-		virtual void setProjectionMatrix(glm::mat4 projectionMatrix) override;
+		void setProjectionMatrix(glm::mat4 projectionMatrix) override;
 
 		void setTileSize(int size);
 
@@ -62,9 +62,9 @@ namespace ts
 			const std::string& renderPassFSSource,
 			const std::string& lightingPassCSSource);
 
-		virtual void drawSetup() override;
+		void drawSetup() override;
 
-		virtual void draw() override;
+		void draw() override;
 
 	protected:
 
@@ -76,15 +76,15 @@ namespace ts
 
 		bool m_showTiles = false;
 
-		std::unique_ptr<ge::gl::VertexArray> m_dummyVAO = nullptr;
+		std::unique_ptr<ge::gl::VertexArray> m_dummyVAO;
 
-		std::unique_ptr<GBuffer> m_gBuffer = nullptr;
-		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer = nullptr;
-		std::unique_ptr<ge::gl::Texture> m_outputTexture = nullptr;
+		std::unique_ptr<GBuffer> m_gBuffer;
+		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer;
+		std::unique_ptr<ge::gl::Texture> m_outputTexture;
 
-		std::unique_ptr<ge::gl::Program> m_geometryPassShaderProgram = nullptr;
-		std::unique_ptr<ge::gl::Program> m_lightingPassShaderProgram = nullptr;
-		std::unique_ptr<ge::gl::Program> m_renderPassShaderProgram = nullptr;
+		std::unique_ptr<ge::gl::Program> m_geometryPassShaderProgram;
+		std::unique_ptr<ge::gl::Program> m_lightingPassShaderProgram;
+		std::unique_ptr<ge::gl::Program> m_renderPassShaderProgram;
 		std::string m_geometryPassVSSource;
 		std::string m_geometryPassFSSource;
 		std::string m_lightingPassCSSource;

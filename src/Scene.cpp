@@ -9,21 +9,21 @@ ts::Scene::Scene(const ge::sg::Scene& scene)
 	m_boundingBox = std::make_unique<ts::AABB>(scene);
 }
 
-ts::Scene::Scene(const Scene& scene)
+ts::Scene::Scene(const Scene& other)
 {
-	m_scene = std::make_unique<ge::sg::Scene>(*scene.m_scene);
-	m_boundingBox = std::make_unique<ts::AABB>(*scene.m_boundingBox);
+	m_scene = std::make_unique<ge::sg::Scene>(*other.m_scene);
+	m_boundingBox = std::make_unique<ts::AABB>(*other.m_boundingBox);
 }
 
-ts::Scene& ts::Scene::operator=(const Scene& scene)
+ts::Scene& ts::Scene::operator=(const Scene& other)
 {
-	if (this == &scene)
+	if (this == &other)
 	{
 		return *this;
 	}
 
-	m_scene = std::make_unique<ge::sg::Scene>(*scene.m_scene);
-	m_boundingBox = std::make_unique<ts::AABB>(*scene.m_boundingBox);
+	m_scene = std::make_unique<ge::sg::Scene>(*other.m_scene);
+	m_boundingBox = std::make_unique<ts::AABB>(*other.m_boundingBox);
 
 	return *this;
 }

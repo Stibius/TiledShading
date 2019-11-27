@@ -45,19 +45,19 @@ namespace ts
 
 	public:
 
-		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
+		std::shared_ptr<ge::gl::Context> m_glContext;
 
 		SceneVT() = default;
 
-		SceneVT(const SceneVT& vt) = delete;
+		SceneVT(const SceneVT& other) = delete;
 
-		SceneVT(SceneVT&& vt) = default;
+		SceneVT(SceneVT&& other) = default;
 
-		SceneVT& operator=(const SceneVT& vt) = delete;
+		SceneVT& operator=(const SceneVT& other) = delete;
 
-		SceneVT& operator=(SceneVT&& vt) = default;
+		SceneVT& operator=(SceneVT&& other) = default;
 
-		virtual ~SceneVT() = default;
+		~SceneVT() override = default;
 
 		virtual void setViewportSize(int width, int height) = 0;
 
@@ -73,7 +73,7 @@ namespace ts
 
 	protected:
 
-		std::shared_ptr<ge::glsg::GLScene> m_glScene = nullptr;
+		std::shared_ptr<ge::glsg::GLScene> m_glScene;
 		std::unordered_map<ge::sg::Mesh*, std::shared_ptr<ge::gl::VertexArray>> VAOContainer;
 		std::unordered_map<ge::sg::Mesh*, std::unordered_map<ge::sg::MaterialSimpleComponent::Semantic, std::unique_ptr<unsigned char[]>>> colorContainer;
 		std::unordered_map<ge::sg::Mesh*, std::unordered_map<ge::sg::MaterialImageComponent::Semantic, std::shared_ptr<ge::gl::Texture>>> textureContainer;

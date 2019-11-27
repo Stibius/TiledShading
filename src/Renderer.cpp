@@ -4,7 +4,7 @@
 #include <ForwardShadingVT.h>
 #include <SceneVT.h>
 #include <LightedSceneVT.h>
-#include <Application.h>
+#include <FileLoader.h>
 
 #include <geGL/geGL.h>
 #include <geSG/Scene.h>
@@ -16,13 +16,11 @@
 
 #include <chrono>
 
-#include <QDebug>
-
 ts::Renderer::Renderer()
 {
 	m_noLightVT = std::make_unique<ForwardShadingVT>();
-	std::string vsSource = Application::loadResourceFile(":/shaders/forwardVS.glsl");
-	std::string fsSource = Application::loadResourceFile(":/shaders/forwardFS.glsl");
+	std::string vsSource = FileLoader::loadFile(":/shaders/forwardVS.glsl");
+	std::string fsSource = FileLoader::loadFile(":/shaders/forwardFS.glsl");
 	m_noLightVT->setShaders(vsSource, fsSource);
 }
 
@@ -113,8 +111,10 @@ int ts::Renderer::render()
 
 	if (m_needToSetLightUniforms)
 	{
-		LightedSceneVT* lightVT = dynamic_cast<LightedSceneVT*>(m_VT.get());
-		if (lightVT) lightVT->setLights(m_pointLights);
+		if (LightedSceneVT* lightVT = dynamic_cast<LightedSceneVT*>(m_VT.get()))
+		{
+			lightVT->setLights(m_pointLights);
+		}
 
 		m_needToSetLightUniforms = false;
 	}

@@ -4,12 +4,11 @@
 #include <DeferredShadingVT.h>
 #include <TiledDeferredShadingVT.h>
 #include <GBufferVT.h>
-#include <Application.h>
+#include <FileLoader.h>
 
 #include <geGL/geGL.h>
 #include <geCore/Text.h>
 
-#include <QDebug>
 #include <QUrl>
 
 ts::RenderingSettingsHandler::RenderingSettingsHandler(Renderer* renderer)
@@ -40,7 +39,7 @@ void ts::RenderingSettingsHandler::setVisualizationTechnique(VisualizationTechni
 
 void ts::RenderingSettingsHandler::setGBufferTexture(GBufferTexture gBufferTexture)
 {
-	if (gBufferTexture != getGBufferTexture())
+	if (gBufferTexture != m_currentGBufferTexture)
 	{
 		m_currentGBufferTexture = gBufferTexture;
 
@@ -53,7 +52,7 @@ void ts::RenderingSettingsHandler::setGBufferTexture(GBufferTexture gBufferTextu
 
 void ts::RenderingSettingsHandler::setTileSize(int value)
 {
-	if (value != getTileSize())
+	if (value != m_tileSize)
 	{
 		m_tileSize = value;
 		if (m_tiledDeferredVT != nullptr)
@@ -68,7 +67,7 @@ void ts::RenderingSettingsHandler::setTileSize(int value)
 
 void ts::RenderingSettingsHandler::setMaxLightsPerTile(int value)
 {
-	if (value != getMaxLightsPerTile())
+	if (value != m_maxLightsPerTile)
 	{
 		m_maxLightsPerTile = value;
 		if (m_tiledDeferredVT != nullptr)
@@ -83,7 +82,7 @@ void ts::RenderingSettingsHandler::setMaxLightsPerTile(int value)
 
 void ts::RenderingSettingsHandler::setShowTiles(bool value)
 {
-	if (value != getShowTiles())
+	if (value != m_showTiles)
 	{
 		m_showTiles = value;
 		if (m_tiledDeferredVT != nullptr)
@@ -132,8 +131,8 @@ void ts::RenderingSettingsHandler::setRenderer()
 	{
 	case VisualizationTechnique::FORWARD_SHADING:
 	{
-		std::string vsSource = Application::loadResourceFile(":/shaders/forwardVS.glsl");
-		std::string fsSource = Application::loadResourceFile(":/shaders/forwardFS.glsl");
+		std::string vsSource = FileLoader::loadFile(":/shaders/forwardVS.glsl");
+		std::string fsSource = FileLoader::loadFile(":/shaders/forwardFS.glsl");
 
 		std::unique_ptr<ForwardShadingVT> forwardVT = std::make_unique<ForwardShadingVT>();
 		forwardVT->setShaders(vsSource, fsSource);
@@ -144,10 +143,10 @@ void ts::RenderingSettingsHandler::setRenderer()
 	break;
 	case VisualizationTechnique::DEFERRED_SHADING:
 	{
-		std::string geometryVsSource = Application::loadResourceFile(":/shaders/deferredGeometryVS.glsl");
-		std::string geometryFsSource = Application::loadResourceFile(":/shaders/deferredGeometryFS.glsl");
-		std::string lightingVsSource = Application::loadResourceFile(":/shaders/deferredLightingVS.glsl");
-		std::string lightingFsSource = Application::loadResourceFile(":/shaders/deferredLightingFS.glsl");
+		std::string geometryVsSource = FileLoader::loadFile(":/shaders/deferredGeometryVS.glsl");
+		std::string geometryFsSource = FileLoader::loadFile(":/shaders/deferredGeometryFS.glsl");
+		std::string lightingVsSource = FileLoader::loadFile(":/shaders/deferredLightingVS.glsl");
+		std::string lightingFsSource = FileLoader::loadFile(":/shaders/deferredLightingFS.glsl");
 
 		std::unique_ptr<DeferredShadingVT> deferredVT = std::make_unique<DeferredShadingVT>();
 		deferredVT->setShaders(geometryVsSource, geometryFsSource, lightingVsSource, lightingFsSource);
@@ -158,11 +157,11 @@ void ts::RenderingSettingsHandler::setRenderer()
 	break;
 	case VisualizationTechnique::TILED_DEFERRED_SHADING:
 	{
-		std::string geometryVsSource = Application::loadResourceFile(":/shaders/deferredGeometryVS.glsl");
-		std::string geometryFsSource = Application::loadResourceFile(":/shaders/deferredGeometryFS.glsl");
-		std::string lightingCsSource = Application::loadResourceFile(":/shaders/tiledDeferredLightingCS.glsl");
-		std::string renderVsSource = Application::loadResourceFile(":/shaders/tiledDeferredRenderVS.glsl");
-		std::string renderFsSource = Application::loadResourceFile(":/shaders/tiledDeferredRenderFS.glsl");
+		std::string geometryVsSource = FileLoader::loadFile(":/shaders/deferredGeometryVS.glsl");
+		std::string geometryFsSource = FileLoader::loadFile(":/shaders/deferredGeometryFS.glsl");
+		std::string lightingCsSource = FileLoader::loadFile(":/shaders/tiledDeferredLightingCS.glsl");
+		std::string renderVsSource = FileLoader::loadFile(":/shaders/tiledDeferredRenderVS.glsl");
+		std::string renderFsSource = FileLoader::loadFile(":/shaders/tiledDeferredRenderFS.glsl");
 
 		std::unique_ptr<TiledDeferredShadingVT> tiledDeferredVT = std::make_unique<TiledDeferredShadingVT>();
 		tiledDeferredVT->setShaders(geometryVsSource, geometryFsSource, lightingCsSource, renderVsSource, renderFsSource);
@@ -176,8 +175,8 @@ void ts::RenderingSettingsHandler::setRenderer()
 	default:
 	case VisualizationTechnique::GBUFFER:
 	{
-		std::string vsSource = Application::loadResourceFile(":/shaders/deferredGeometryVS.glsl");
-		std::string fsSource = Application::loadResourceFile(":/shaders/deferredGeometryFS.glsl");
+		std::string vsSource = FileLoader::loadFile(":/shaders/deferredGeometryVS.glsl");
+		std::string fsSource = FileLoader::loadFile(":/shaders/deferredGeometryFS.glsl");
 
 		std::unique_ptr<GBufferVT> gBufferVT = std::make_unique<GBufferVT>();
 		gBufferVT->setShaders(vsSource, fsSource);

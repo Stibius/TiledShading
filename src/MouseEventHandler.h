@@ -15,11 +15,21 @@ namespace ts
 
 		MouseEventHandler() = default;
 
-		MouseEventHandler(Camera* camera);
+		explicit MouseEventHandler(Camera* camera);
 
-		virtual ~MouseEventHandler() = default;
+		MouseEventHandler(const MouseEventHandler& other) = default;
+
+		MouseEventHandler(MouseEventHandler&& other) = default;
+
+		MouseEventHandler& operator=(const MouseEventHandler& other) = default;
+
+		MouseEventHandler& operator=(MouseEventHandler&& other) = default;
+
+		~MouseEventHandler() override = default;
 
 		void init(Camera* camera);
+
+		bool eventFilter(QObject* obj, QEvent* event) override;
 
 	signals:
 
@@ -32,8 +42,6 @@ namespace ts
 		void rotationSpeedChanged(float value);
 
 	protected:
-
-		bool eventFilter(QObject* obj, QEvent* event);
 
 		Camera* m_camera = nullptr;
 		bool m_rightMousePressed = false;

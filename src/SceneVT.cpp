@@ -32,6 +32,7 @@ void ts::SceneVT::processScene()
 			else
 			{
 				int attribLocation = semantic2Attribute(glattrib.attributeDescriptor->semantic);
+
 				if (attribLocation != -1)
 				{
 					VAO->addAttrib(glattrib.BO, attribLocation, glattrib.attributeDescriptor->numComponents, ge::glsg::translateEnum(glattrib.attributeDescriptor->type), (GLsizei)glattrib.attributeDescriptor->stride);

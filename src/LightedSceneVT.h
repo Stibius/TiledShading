@@ -26,7 +26,7 @@ namespace ts
 
 	protected:
 
-		std::shared_ptr<std::vector<ge::sg::PointLight>> m_pointLights = nullptr;
+		std::shared_ptr<std::vector<ge::sg::PointLight>> m_pointLights;
 		
 		bool m_needToSetupLights = true;
 	};

@@ -26,7 +26,15 @@ namespace ts
 
 		CameraSettingsHandler(Camera* camera, const Scene* scene);
 
-		virtual ~CameraSettingsHandler() = default;
+		CameraSettingsHandler(const CameraSettingsHandler& other) = default;
+
+		CameraSettingsHandler(CameraSettingsHandler&& other) = default;
+
+		CameraSettingsHandler& operator=(const CameraSettingsHandler& other) = default;
+
+		CameraSettingsHandler& operator=(CameraSettingsHandler&& other) = default;
+
+		~CameraSettingsHandler() override = default;
 
 		void init(Camera* camera, const Scene* scene);
 

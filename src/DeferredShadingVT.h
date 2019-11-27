@@ -36,17 +36,17 @@ namespace ts
 
 		DeferredShadingVT() = default;
 
-		DeferredShadingVT(const DeferredShadingVT& vt) = delete;
+		DeferredShadingVT(const DeferredShadingVT& other) = delete;
 
-		DeferredShadingVT(DeferredShadingVT&& vt) = default;
+		DeferredShadingVT(DeferredShadingVT&& other) = default;
 
-		DeferredShadingVT& operator=(const DeferredShadingVT& vt) = delete;
+		DeferredShadingVT& operator=(const DeferredShadingVT& other) = delete;
 
-		DeferredShadingVT& operator=(DeferredShadingVT&& vt) = default;
+		DeferredShadingVT& operator=(DeferredShadingVT&& other) = default;
 
-		virtual ~DeferredShadingVT() = default;
+		~DeferredShadingVT() override = default;
 
-		virtual void setViewportSize(int width, int height) override;
+		void setViewportSize(int width, int height) override;
 
 		void setShaders(
 			const std::string& geometryPassVSSource, 
@@ -54,22 +54,22 @@ namespace ts
 			const std::string& lightingPassVSSource,
 			const std::string& lightingPassFSSource);
 
-		virtual void drawSetup() override;
+		void drawSetup() override;
 
-		virtual void draw() override;
+		void draw() override;
 
 	protected:
 
 		int m_screenWidth;
 		int m_screenHeight;
 
-		std::unique_ptr<ge::gl::VertexArray> m_sphereVAO = nullptr;
+		std::unique_ptr<ge::gl::VertexArray> m_sphereVAO;
 
-		std::unique_ptr<GBuffer> m_gBuffer = nullptr;
+		std::unique_ptr<GBuffer> m_gBuffer;
 
-		std::unique_ptr<ge::gl::Program> m_geometryPassShaderProgram = nullptr;
-		std::unique_ptr<ge::gl::Program> m_stencilPassShaderProgram = nullptr;
-		std::unique_ptr<ge::gl::Program> m_lightingPassShaderProgram = nullptr;
+		std::unique_ptr<ge::gl::Program> m_geometryPassShaderProgram;
+		std::unique_ptr<ge::gl::Program> m_stencilPassShaderProgram;
+		std::unique_ptr<ge::gl::Program> m_lightingPassShaderProgram;
 		std::string m_geometryPassVSSource;
 		std::string m_geometryPassFSSource;
 		static const std::string ts::DeferredShadingVT::m_stencilPassVSSource;

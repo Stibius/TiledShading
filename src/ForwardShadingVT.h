@@ -37,28 +37,28 @@ namespace ts
 
 		ForwardShadingVT() = default;
 
-		ForwardShadingVT(const ForwardShadingVT& vt) = delete;
+		ForwardShadingVT(const ForwardShadingVT& other) = delete;
 
-		ForwardShadingVT(ForwardShadingVT&& vt) = default;
+		ForwardShadingVT(ForwardShadingVT&& other) = default;
 
-		ForwardShadingVT& operator=(const ForwardShadingVT& vt) = delete;
+		ForwardShadingVT& operator=(const ForwardShadingVT& other) = delete;
 
-		ForwardShadingVT& operator=(ForwardShadingVT&& vt) = default;
+		ForwardShadingVT& operator=(ForwardShadingVT&& other) = default;
 
-		virtual ~ForwardShadingVT() = default;
+		~ForwardShadingVT() override = default;
 
-		virtual void setViewportSize(int width, int height) override;
+		void setViewportSize(int width, int height) override;
 
 		void setShaders(const std::string& vsSource, const std::string& fsSource);
 
-		virtual void drawSetup() override;
+		void drawSetup() override;
 
-		virtual void draw() override;
+		void draw() override;
 
 	protected:
 
-		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer = nullptr;
-		std::unique_ptr<ge::gl::Program> m_shaderProgram = nullptr;
+		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer;
+		std::unique_ptr<ge::gl::Program> m_shaderProgram;
 		std::string m_vsSource;
 		std::string m_fsSource;
 

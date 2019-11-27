@@ -14,11 +14,21 @@ namespace ts
 
 		KeyEventHandler() = default;
 
-		KeyEventHandler(Camera* camera);
+		explicit KeyEventHandler(Camera* camera);
 
-		virtual ~KeyEventHandler() = default;
+		KeyEventHandler(const KeyEventHandler& other) = default;
+
+		KeyEventHandler(KeyEventHandler&& other) = default;
+
+		KeyEventHandler& operator=(const KeyEventHandler& other) = default;
+
+		KeyEventHandler& operator=(KeyEventHandler&& other) = default;
+
+		~KeyEventHandler() override = default;
 
 		void init(Camera* camera);
+
+		bool eventFilter(QObject* obj, QEvent* event) override;
 
 	signals:
 
@@ -29,8 +39,6 @@ namespace ts
 		void absoluteStepSizeChanged(float value);
 
 	protected:
-
-		bool eventFilter(QObject* obj, QEvent* event);
 
 		Camera* m_camera = nullptr;
 

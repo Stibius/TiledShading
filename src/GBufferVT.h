@@ -24,17 +24,17 @@ namespace ts
 
 		GBufferVT() = default;
 
-		GBufferVT(const GBufferVT& vt) = delete;
+		GBufferVT(const GBufferVT& other) = delete;
 
-		GBufferVT(GBufferVT&& vt) = default;
+		GBufferVT(GBufferVT&& other) = default;
 
-		GBufferVT& operator=(const GBufferVT& vt) = delete;
+		GBufferVT& operator=(const GBufferVT& other) = delete;
 
-		GBufferVT& operator=(GBufferVT&& vt) = default;
+		GBufferVT& operator=(GBufferVT&& other) = default;
 
-		virtual ~GBufferVT() = default;
+		~GBufferVT() override = default;
 
-		virtual void setViewportSize(int width, int height) override;
+		void setViewportSize(int width, int height) override;
 
 		void setShaders(
 			const std::string& VSSource,
@@ -42,18 +42,18 @@ namespace ts
 
 		void setDrawBuffer(GBuffer::Buffers buffer);
 
-		virtual void drawSetup() override;
+		void drawSetup() override;
 
-		virtual void draw() override;
+		void draw() override;
 
 	protected:
 
 		int m_screenWidth;
 		int m_screenHeight;
 
-		std::unique_ptr<GBuffer> m_gBuffer = nullptr;
+		std::unique_ptr<GBuffer> m_gBuffer;
 		GBuffer::Buffers m_drawBuffer;
-		std::unique_ptr<ge::gl::Program> m_shaderProgram = nullptr;
+		std::unique_ptr<ge::gl::Program> m_shaderProgram;
 		std::string m_VSSource;
 		std::string m_FSSource;
 

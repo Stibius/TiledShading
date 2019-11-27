@@ -7,9 +7,6 @@
 #include <glsg/GLScene.h>
 #include <glsg/EnumToGL.h>
 
-
-#include <QDebug>
-
 void ts::TiledDeferredShadingVT::setViewportSize(int width, int height)
 {
 	m_screenWidth = width;

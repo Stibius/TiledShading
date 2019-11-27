@@ -22,13 +22,13 @@ namespace ts
 
 		explicit Scene(const ge::sg::Scene& scene);
 
-		Scene(const Scene& scene);
+		Scene(const Scene& other);
 
-		Scene(Scene&& scene) = default;
+		Scene(Scene&& other) = default;
 
-		Scene& operator=(const Scene& scene);
+		Scene& operator=(const Scene& other);
 
-		Scene& operator=(Scene&& scene) = default;
+		Scene& operator=(Scene&& other) = default;
 
 		virtual ~Scene() = default;
 

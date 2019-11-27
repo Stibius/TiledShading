@@ -18,7 +18,7 @@
 #include <geSG/Scene.h>
 
 bool Application::m_initialized = false;
-QGuiApplication* Application::m_qGuiApplication = nullptr;
+std::unique_ptr<QGuiApplication> Application::m_qGuiApplication;
 ts::LightsGenerationHandler Application::m_lightsGenerationHandler;
 ts::SceneLoadingHandler Application::m_sceneLoadingHandler;
 ts::MouseEventHandler Application::m_mouseEventHandler;
@@ -28,23 +28,8 @@ ts::RenderingSettingsHandler Application::m_renderingSettingsHandler;
 std::shared_ptr<ts::Camera> Application::m_camera = std::make_shared<ts::Camera>();
 ts::Scene Application::m_scene;
 
-std::string Application::loadResourceFile(const std::string& path)
-{
-	QString content;
-	QFile inFile(QString::fromStdString(path));
-	if (inFile.open(QFile::ReadOnly | QFile::Text))
-	{
-		QTextStream inStream(&inFile);
-		content = inStream.readAll();
-		inFile.close();
-	}
-
-	return content.toStdString();
-}
-
 bool Application::init(int& argc, char* argv[], int& exitCode)
 {
-	// protect against multiple initializations
 	exitCode = 0;
 	if (m_initialized)
 	{
@@ -52,7 +37,7 @@ bool Application::init(int& argc, char* argv[], int& exitCode)
 	}
 	m_initialized = true;
 
-	m_qGuiApplication = new QGuiApplication(argc, argv);
+	m_qGuiApplication = std::make_unique<QGuiApplication>(argc, argv);
 
 	QSurfaceFormat format;
 	format.setDepthBufferSize(24);
@@ -119,6 +104,5 @@ void Application::cleanUp()
 	}
 	m_initialized = false;
 
-	delete m_qGuiApplication;
 	m_qGuiApplication = nullptr;
 }

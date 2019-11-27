@@ -42,13 +42,13 @@ namespace ts
 
 		Renderer();
 
-		Renderer(const Renderer&) = delete;
+		Renderer(const Renderer& other) = delete;
 
-		Renderer(Renderer&&) = default;
+		Renderer(Renderer&& other) = default;
 
-		Renderer& operator=(const Renderer&) = delete;
+		Renderer& operator=(const Renderer& other) = delete;
 
-		Renderer& operator=(Renderer&&) = default;
+		Renderer& operator=(Renderer&& other) = default;
 
 		virtual ~Renderer() = default;
 
@@ -68,14 +68,14 @@ namespace ts
 
 		int m_viewPortWidth;
 		int m_viewPortHeight;
-		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
-		std::shared_ptr<ge::sg::Scene> m_scene = nullptr;
-		std::shared_ptr<ge::glsg::GLScene> m_glScene = nullptr;
-		std::shared_ptr<Camera> m_camera = nullptr;
-		std::shared_ptr<std::vector<ge::sg::PointLight>> m_pointLights = nullptr;
-		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer = nullptr;
-		std::unique_ptr<SceneVT> m_VT = nullptr;
-		std::unique_ptr<ForwardShadingVT> m_noLightVT = nullptr;
+		std::shared_ptr<ge::gl::Context> m_glContext;
+		std::shared_ptr<ge::sg::Scene> m_scene;
+		std::shared_ptr<ge::glsg::GLScene> m_glScene;
+		std::shared_ptr<Camera> m_camera;
+		std::shared_ptr<std::vector<ge::sg::PointLight>> m_pointLights;
+		std::unique_ptr<ge::gl::Buffer> m_lightsShaderStorageBuffer;
+		std::unique_ptr<SceneVT> m_VT;
+		std::unique_ptr<ForwardShadingVT> m_noLightVT;
 		bool m_needToProcessScene = false;
 		bool m_needToSetLightUniforms = true;
 		bool m_needToInitVT = true;

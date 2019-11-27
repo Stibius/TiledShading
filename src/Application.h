@@ -19,7 +19,7 @@ class Application
 public:
 
 	static bool m_initialized;
-	static QGuiApplication* m_qGuiApplication;
+	static std::unique_ptr<QGuiApplication> m_qGuiApplication;
 	static ts::LightsGenerationHandler m_lightsGenerationHandler;
 	static ts::SceneLoadingHandler m_sceneLoadingHandler;
 	static ts::MouseEventHandler m_mouseEventHandler;
@@ -28,8 +28,6 @@ public:
 	static ts::RenderingSettingsHandler m_renderingSettingsHandler;
 	static std::shared_ptr<ts::Camera> m_camera;
 	static ts::Scene m_scene;
-
-	static std::string loadResourceFile(const std::string& path);
 
 	static bool init(int& argc, char* argv[], int& exitCode);
 

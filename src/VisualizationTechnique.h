@@ -15,6 +15,16 @@ namespace ts
 
 	public:
 
+		VisualizationTechnique() = default;
+
+		VisualizationTechnique(const VisualizationTechnique& other) = delete;
+
+		VisualizationTechnique(VisualizationTechnique&& other) = default;
+
+		VisualizationTechnique& operator=(const VisualizationTechnique& other) = delete;
+
+		VisualizationTechnique& operator=(VisualizationTechnique&& other) = default;
+
 		virtual ~VisualizationTechnique() = default;
 
 		virtual void drawSetup() = 0;

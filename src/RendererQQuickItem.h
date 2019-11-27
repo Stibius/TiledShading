@@ -19,15 +19,15 @@ namespace ts
 
 		RendererQQuickItem();
 
-		RendererQQuickItem(const RendererQQuickItem&) = delete;
+		RendererQQuickItem(const RendererQQuickItem& other) = delete;
 
-		RendererQQuickItem(RendererQQuickItem&&) = default;
+		RendererQQuickItem(RendererQQuickItem&& other) = default;
 
-		RendererQQuickItem& operator=(const RendererQQuickItem&) = delete;
+		RendererQQuickItem& operator=(const RendererQQuickItem& other) = delete;
 
-		RendererQQuickItem& operator=(RendererQQuickItem&&) = default;
+		RendererQQuickItem& operator=(RendererQQuickItem&& other) = default;
 
-		virtual ~RendererQQuickItem() = default;
+		~RendererQQuickItem() override = default;
 
 		void setShowRenderTime(bool value);
 

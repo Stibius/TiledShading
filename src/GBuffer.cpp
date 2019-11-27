@@ -88,7 +88,7 @@ void ts::GBuffer::drawBuffers(GLsizei n, ...) const
 
 	va_list args;
 	va_start(args, n);
-	for (GLsizei i = 0; i < n; i++)
+	for (GLsizei i = 0; i < n; ++i)
 	{
 		Buffers buffer = (Buffers)va_arg(args, Buffers);
 		attachments[i] = bufferToAttachment(buffer);
@@ -107,21 +107,21 @@ void ts::GBuffer::drawBuffers(const std::vector<Buffers> buffers) const
 	if (n == 0)
 	{
 		m_gBuffer->drawBuffer(GL_NONE);
-
-		return;
 	}
-
-	m_gBuffer->bind(GL_DRAW_FRAMEBUFFER);
-
-	std::vector<GLenum> attachments;
-
-	for (GLsizei i = 0; i < n; i++)
+	else
 	{
-		Buffers buffer = buffers[i];
-		attachments.push_back(bufferToAttachment(buffer));
-	}
+		m_gBuffer->bind(GL_DRAW_FRAMEBUFFER);
 
-	m_gBuffer->drawBuffers(attachments);
+		std::vector<GLenum> attachments;
+
+		for (GLsizei i = 0; i < n; ++i)
+		{
+			Buffers buffer = buffers[i];
+			attachments.push_back(bufferToAttachment(buffer));
+		}
+
+		m_gBuffer->drawBuffers(attachments);
+	}
 }
 
 void ts::GBuffer::readBuffer(Buffers buffer) const

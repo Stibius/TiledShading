@@ -24,6 +24,14 @@ namespace ts
 
 		explicit AABB(const ge::sg::Scene& scene);
 
+		AABB(const AABB& other) = default;
+
+		AABB(AABB&& other) = default;
+
+		AABB& operator=(const AABB& other) = default;
+
+		AABB& operator=(AABB&& other) = default;
+
 		virtual ~AABB() = default;
 
 		bool compute(const ge::sg::Scene& scene);

@@ -53,9 +53,17 @@ namespace ts
 
 		RenderingSettingsHandler() = default;
 
-		RenderingSettingsHandler(Renderer* renderer);
+		explicit RenderingSettingsHandler(Renderer* renderer);
 
-		virtual ~RenderingSettingsHandler() = default;
+		RenderingSettingsHandler(const RenderingSettingsHandler& other) = default;
+
+		RenderingSettingsHandler(RenderingSettingsHandler&& other) = default;
+
+		RenderingSettingsHandler& operator=(const RenderingSettingsHandler& other) = default;
+
+		RenderingSettingsHandler& operator=(RenderingSettingsHandler&& other) = default;
+
+		~RenderingSettingsHandler() override = default;
 
 		void init(Renderer* renderer);
 

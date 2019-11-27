@@ -17,7 +17,15 @@ namespace ts
 
 		LightsGenerationHandler(const Scene* scene, Renderer* renderer);
 
-		virtual ~LightsGenerationHandler() = default;
+		LightsGenerationHandler(const LightsGenerationHandler& other) = default;
+
+		LightsGenerationHandler(LightsGenerationHandler&& other) = default;
+
+		LightsGenerationHandler& operator=(const LightsGenerationHandler& other) = default;
+
+		LightsGenerationHandler& operator=(LightsGenerationHandler&& other) = default;
+
+		~LightsGenerationHandler() override = default;
 
 		void init(const Scene* scene, Renderer* renderer);
 

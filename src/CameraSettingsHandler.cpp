@@ -7,8 +7,6 @@
 #include <geUtil/FreeLookCamera.h>
 #include <geUtil/PerspectiveCamera.h>
 
-#include <QDebug>
-
 ts::CameraSettingsHandler::CameraSettingsHandler(Camera* camera, const Scene* scene)
 	: m_camera(camera)
 	, m_scene(scene)
@@ -34,7 +32,7 @@ void ts::CameraSettingsHandler::setFovy(float value)
 
 void ts::CameraSettingsHandler::setRelativeStepSize(float value)
 {
-	if (value != getRelativeStepSize())
+	if (value != m_relativeStepSize)
 	{
 		m_relativeStepSize = value;
 
@@ -45,7 +43,7 @@ void ts::CameraSettingsHandler::setRelativeStepSize(float value)
 
 void ts::CameraSettingsHandler::setRotationSpeed(float value)
 {
-	if (value != getRotationSpeed())
+	if (value != m_rotationSpeed)
 	{
 		m_rotationSpeed = value;
 
@@ -55,7 +53,7 @@ void ts::CameraSettingsHandler::setRotationSpeed(float value)
 
 void ts::CameraSettingsHandler::setRelativeZoomSpeed(float value)
 {
-	if (value != getRelativeZoomSpeed())
+	if (value != m_relativeZoomSpeed)
 	{
 		m_relativeZoomSpeed = value;
 

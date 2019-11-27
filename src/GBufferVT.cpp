@@ -9,8 +9,6 @@
 #include <geGL/Texture.h>
 #include <glsg/EnumToGL.h>
 
-#include <QDebug>
-
 void ts::GBufferVT::setViewportSize(int width, int height)
 {
 	m_screenWidth = width;

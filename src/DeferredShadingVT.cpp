@@ -191,12 +191,7 @@ void ts::DeferredShadingVT::draw()
 
 	m_glContext->glDisable(GL_STENCIL_TEST);
 
-	//if (normal)
-		//m_gBuffer->readBuffer(GBuffer::NORMAL_TEXTURE);
-	//else if (position)
-		//m_gBuffer->readBuffer(GBuffer::POSITION_TEXTURE);
-	//else
-		m_gBuffer->readBuffer(GBuffer::OUTPUT_RENDERBUFFER);
+	m_gBuffer->readBuffer(GBuffer::OUTPUT_RENDERBUFFER);
 
 	m_glContext->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	m_glContext->glBlitFramebuffer(0, 0, m_screenWidth, m_screenHeight, 0, 0, m_screenWidth, m_screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);

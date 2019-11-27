@@ -9,6 +9,9 @@ set( CMAKE_AUTORCC ON )
 set( CMAKE_AUTOUIC ON )
 set( CMAKE_AUTOMOC ON )
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 find_package(Qt5 QUIET COMPONENTS Quick Concurrent)
 find_package(GPUEngine QUIET COMPONENTS geCore geGL geSG geUtil)
 
@@ -83,6 +86,7 @@ set(HEADER_FILES
    src/Camera.h
    src/CameraSettingsHandler.h
    src/DeferredShadingVT.h
+   src/FileLoader.h
    src/ForwardShadingVT.h
    src/GBuffer.h
    src/GBufferVT.h
@@ -108,6 +112,7 @@ set(SOURCE_FILES
    src/Camera.cpp
    src/CameraSettingsHandler.cpp
    src/DeferredShadingVT.cpp
+   src/FileLoader.cpp
    src/ForwardShadingVT.cpp
    src/GBuffer.cpp
    src/GBufferVT.cpp

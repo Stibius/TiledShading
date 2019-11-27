@@ -38,17 +38,17 @@ namespace ts
 			OUTPUT_RENDERBUFFER = NUM_TEXTURES
 		};
 
-		std::shared_ptr<ge::gl::Context> m_glContext = nullptr;
+		std::shared_ptr<ge::gl::Context> m_glContext;
 
 		GBuffer() = default;
 
-		GBuffer(const GBuffer& gBuffer) = delete;
+		GBuffer(const GBuffer& other) = delete;
 
-		GBuffer(GBuffer&& vt) = default;
+		GBuffer(GBuffer&& other) = default;
 
-		GBuffer& operator=(const GBuffer& gBuffer) = delete;
+		GBuffer& operator=(const GBuffer& other) = delete;
 
-		GBuffer& operator=(GBuffer&& gBuffer) = default;
+		GBuffer& operator=(GBuffer&& other) = default;
 
 		virtual ~GBuffer() = default;
 
@@ -67,7 +67,7 @@ namespace ts
 		int m_screenWidth;
 		int m_screenHeight;
 
-		std::unique_ptr<ge::gl::Framebuffer> m_gBuffer = nullptr;
+		std::unique_ptr<ge::gl::Framebuffer> m_gBuffer;
 		std::shared_ptr<ge::gl::Texture> m_textures[NUM_TEXTURES];
 
 		GLenum bufferToAttachment(Buffers buffer) const;

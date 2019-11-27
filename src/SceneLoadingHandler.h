@@ -29,7 +29,15 @@ namespace ts
 
 		SceneLoadingHandler(Scene* scene, Renderer* renderer);
 
-		virtual ~SceneLoadingHandler() = default;
+		SceneLoadingHandler(const SceneLoadingHandler& other) = default;
+
+		SceneLoadingHandler(SceneLoadingHandler&& other) = default;
+
+		SceneLoadingHandler& operator=(const SceneLoadingHandler& other) = default;
+
+		SceneLoadingHandler& operator=(SceneLoadingHandler&& other) = default;
+
+		~SceneLoadingHandler() override = default;
 
 		void init(Scene* scene, Renderer* renderer);
 
@@ -52,8 +60,8 @@ namespace ts
 		Renderer* m_renderer = nullptr;
 		Scene* m_scene = nullptr;
 
-		QFuture<std::shared_ptr<ge::sg::Scene>> sceneFuture;
-		QFutureWatcher<std::shared_ptr<ge::sg::Scene>> sceneFutureWatcher;
+		QFuture<std::shared_ptr<ge::sg::Scene>> m_sceneFuture;
+		QFutureWatcher<std::shared_ptr<ge::sg::Scene>> m_sceneFutureWatcher;
 
 		bool m_initialized = false;
 

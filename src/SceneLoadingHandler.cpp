@@ -50,7 +50,7 @@ void ts::SceneLoadingHandler::loadImages(ge::sg::Scene& scene, const std::string
 	{
 		for (std::shared_ptr<ge::sg::Material> material : model->materials)
 		{
-			for (std::vector<std::shared_ptr<ge::sg::MaterialComponent>>::iterator it = material->materialComponents.begin(); it != material->materialComponents.end(); ++it)
+			for (std::vector<std::shared_ptr<ge::sg::MaterialComponent>>::const_iterator it = material->materialComponents.begin(); it != material->materialComponents.end(); ++it)
 			{
 				if ((*it)->getType() == ge::sg::MaterialComponent::ComponentType::IMAGE)
 				{
@@ -59,7 +59,6 @@ void ts::SceneLoadingHandler::loadImages(ge::sg::Scene& scene, const std::string
 					std::shared_ptr<QtImage> image(QtImageLoader::loadImage(textFile.c_str()));
 					if (image == nullptr)
 					{
-						//qDebug() << "  " << "FAILED TO LOAD!" << "substituting default image\n";
 						img->image = defaultImage;
 					}
 					else {
@@ -75,17 +74,21 @@ void ts::SceneLoadingHandler::startLoading(const QUrl& sceneFile)
 {
 	if (!m_initialized)
 	{
-		QObject::connect(&sceneFutureWatcher, &QFutureWatcher<std::shared_ptr<ge::sg::Scene>>::finished, this, &ts::SceneLoadingHandler::loadingFinished);
+		QObject::connect(&m_sceneFutureWatcher, &QFutureWatcher<std::shared_ptr<ge::sg::Scene>>::finished, this, &ts::SceneLoadingHandler::loadingFinished);
 		m_initialized = true;
 	}
 
-	sceneFuture = QtConcurrent::run(this, &SceneLoadingHandler::loadScene, sceneFile);
-	sceneFutureWatcher.setFuture(sceneFuture);
+	m_sceneFuture = QtConcurrent::run([this, sceneFile]()
+	{
+		return loadScene(sceneFile);
+	});
+
+	m_sceneFutureWatcher.setFuture(m_sceneFuture);
 }
 
 void ts::SceneLoadingHandler::loadingFinished()
 {
-	std::shared_ptr<ge::sg::Scene> scene = sceneFuture.result();
+	std::shared_ptr<ge::sg::Scene> scene = m_sceneFuture.result();
 	if (!scene || scene->models.empty())
 	{
 		emit sceneLoadingFailed();

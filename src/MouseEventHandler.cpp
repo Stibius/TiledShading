@@ -8,7 +8,6 @@
 
 #include <QEvent>
 #include <QMouseEvent>
-#include <QDebug>
 
 ts::MouseEventHandler::MouseEventHandler(Camera* camera)
 	: m_camera(camera)

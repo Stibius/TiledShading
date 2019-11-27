@@ -22,9 +22,10 @@ void ts::LightsGenerationHandler::generate(int count, float minX, float maxX, fl
 {
 	const AABB& boundingBox = m_scene->getBoundingBox();
 	std::shared_ptr<std::vector<ge::sg::PointLight>> pointLights = std::make_shared<std::vector<ge::sg::PointLight>>();
+	pointLights->reserve(count);
 	glm::vec3 center = boundingBox.getCenter();
 
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < count; ++i)
 	{
 		ge::sg::PointLight light;
 
