@@ -13,6 +13,7 @@ It is based on this paper: <a href="doc/tiled_shading_preprint.pdf">tiled_shadin
   - Required packages: geGL, geSG, geUtil 
   
 ### Features:
+- QML GUI
 - can load 3D scenes from files and display them 
 - can populate the scene with large amount of randomized lights
 - implemented rendering techniques:
@@ -32,7 +33,7 @@ Normals in the G-Buffer:
 
 <img src="images/image2.png" alt="Terrain Generator"/>
 
-GUI:
+QML GUI:
 
 <img src="images/image3.png" alt="Terrain Generator"/>
 <img src="images/image4.png" alt="Terrain Generator"/>
