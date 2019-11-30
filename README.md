@@ -2,8 +2,7 @@
 
 Application demonstrating the Tiled Shading rendering technique.
 
-It is based on this paper:</br> 
-<a href="doc/tiled_shading_preprint.pdf" alt="tiled_shading_preprint.pdf"/>
+It is based on this paper: <a href="doc/tiled_shading_preprint.pdf">tiled_shading_preprint.pdf</a>
 
 ### External Libraries
 
