@@ -1,6 +1,9 @@
 # Tiled Shading
 
-Application demonstrating the Tiled Shading rendering technique: http://www.cse.chalmers.se/~uffe/tiled_shading_preprint.pdf
+Application demonstrating the Tiled Shading rendering technique.
+
+It is based on this paper:</br> 
+<a href="doc/tiled_shading_preprint.pdf" alt="tiled_shading_preprint.pdf"/>
 
 ### External Libraries
 
