@@ -1,6 +1,6 @@
 # Tiled Shading
 
-Application demonstrating the Tiled Shading rendering technique.
+Application demonstrating the Forward shading, Deferred shading and Tiled Deferred Shading rendering techniques.
 
 It is based on this paper: <a href="doc/tiled_shading_preprint.pdf">tiled_shading_preprint.pdf</a>
 
