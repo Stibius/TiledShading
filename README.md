@@ -1,6 +1,6 @@
 # Tiled Shading
 
-Application demonstrating the Forward shading, Deferred shading and Tiled Deferred Shading rendering techniques.
+Application demonstrating the Forward Shading, Deferred Shading and Tiled Deferred Shading rendering techniques.
 
 It is based on this paper: <a href="doc/tiled_shading_preprint.pdf">tiled_shading_preprint.pdf</a>
 
@@ -17,9 +17,9 @@ It is based on this paper: <a href="doc/tiled_shading_preprint.pdf">tiled_shadin
 - can load 3D scenes from files and display them 
 - can populate the scene with large amount of randomized lights
 - implemented rendering techniques:
-  - Forward shading
-  - Deferred shading
-  - Tiled deferred shading (uses compute shaders)
+  - Forward Shading
+  - Deferred Shading
+  - Tiled Deferred Shading (uses compute shaders)
 - can visualize the G-Buffer and the tiles
 - Orbit and Freelook camera
 
