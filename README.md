@@ -7,8 +7,8 @@ It is based on this paper: <a href="doc/tiled_shading_preprint.pdf">tiled_shadin
 ### External Libraries
 
 - Qt5
-- glm
 - Assimp 
+- glm
 - GPUEngine: https://github.com/Rendering-FIT/GPUEngine/tree/6d35d13892ee13859772ff133b351a4d0841ffa5
   - Required packages: geGL, geSG, geUtil 
   
